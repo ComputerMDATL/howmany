@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    @apply bg-sky text-cream font-body min-h-screen overflow-x-hidden;
+  }
+}
+
+@layer utilities {
+  /* Star twinkle — needs CSS custom props so Tailwind can't do it alone */
+  .star {
+    @apply absolute rounded-full bg-white;
+    animation: twinkle var(--d, 3s) ease-in-out infinite var(--delay, 0s);
+  }
+
+  /* Input focus ring in gold */
+  .input-gold:focus {
+    outline: none;
+    border-color: #F5C842;
+    box-shadow: 0 0 0 3px rgba(245, 200, 66, 0.08);
+  }
+
+  /* Scrollbar hidden but scrollable */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
