@@ -1,10 +1,10 @@
 import './globals.css'
 
 export const metadata = {
-  title: 'How Many?',
+  title: 'Ask how Many?',
   description: 'Ask anything. Get a real answer with the math shown.',
   openGraph: {
-    title: 'How Many?',
+    title: 'Ask how Many?',
     description: 'Ask anything. Get a real answer with the math shown.',
     url: 'https://howmany.app',
     type: 'website',
