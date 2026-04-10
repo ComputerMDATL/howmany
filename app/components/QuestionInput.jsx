@@ -60,7 +60,7 @@ const QuestionInput = forwardRef(function QuestionInput({ onAsk, disabled }, ref
         title={supported.current ? 'Tap to speak' : 'Voice requires Chrome or Edge'}
         className={[
           'absolute right-2.5 top-1/2 -translate-y-1/2',
-          'w-9 h-9 rounded-full border-none flex items-center justify-content text-sky text-base',
+          'w-9 h-9 rounded-full border-none flex items-center text-sky text-base',
           'flex items-center justify-center transition-all',
           listening        ? 'bg-coral animate-pulse'  : 'bg-gold hover:bg-gold2 hover:scale-105',
           !supported.current ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer',

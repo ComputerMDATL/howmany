@@ -1,8 +1,14 @@
 // ─── Header ──────────────────────────────────────────────────────────────────
-export function Header() {
+export function Header({ onReset }) {
   return (
     <div className="text-center py-7">
-      <h1 className="font-display text-5xl font-black text-gold tracking-tight leading-none">
+      <h1
+        onClick={onReset}
+        className={[
+          'font-display text-5xl font-black text-gold tracking-tight leading-none',
+          onReset ? 'cursor-pointer hover:opacity-80 transition-opacity' : '',
+        ].join(' ')}
+      >
         How{' '}
         <span className="font-normal italic text-cream">many</span>
         ?
