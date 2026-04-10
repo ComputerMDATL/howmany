@@ -49,7 +49,7 @@ async function askWithTools(question) {
 
   for (let turn = 0; turn < MAX_TURNS; turn++) {
     const response = await client.messages.create({
-      model:      'claude-sonnet-4-5-20250514',
+      model:      'claude-sonnet-4-6',
       max_tokens: 1500,
       system:     SYSTEM,
       tools:      [{ type: 'web_search_20250305', name: 'web_search' }],
@@ -92,7 +92,7 @@ export async function POST(request) {
     return NextResponse.json(parsed)
 
   } catch (err) {
-    console.error('[/api/ask]', err.message)
+    console.error('[/api/ask]', err.message, err.status ?? '', err.error ?? '')
 
     // Always return a graceful fallback — never a 500 to the user
     const message =
