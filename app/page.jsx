@@ -18,8 +18,9 @@ import Toast          from './components/Toast'
 export default function Home() {
   const { status, answer, fallback, thought, isRetry, ask, reset } = useAsk()
   const interstitial = useInterstitial()
-  const [currentQ,  setCurrentQ]  = useState('')
-  const [shareOpen, setShareOpen] = useState(false)
+  const [currentQ,   setCurrentQ]  = useState('')
+  const [inputValue, setInputValue] = useState('')
+  const [shareOpen,  setShareOpen] = useState(false)
   const [toast,     setToast]     = useState(null)
   const inputRef = useRef(null)
 
@@ -41,6 +42,7 @@ export default function Home() {
       reset()
       setShareOpen(false)
       setCurrentQ('')
+      setInputValue('')
       setTimeout(() => inputRef.current?.focus(), 100)
     })
   }, [interstitial, reset])
@@ -55,6 +57,8 @@ export default function Home() {
         <Header onReset={status !== 'idle' ? handleReset : undefined} />
         <QuestionInput
           ref={inputRef}
+          value={inputValue}
+          onChange={setInputValue}
           onAsk={handleAsk}
           disabled={status === 'loading'}
         />

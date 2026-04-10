@@ -1,8 +1,7 @@
 'use client'
-import { forwardRef, useState, useRef, useEffect } from 'react'
+import { forwardRef, useState, useRef, useEffect } from 'react' // useState kept for shaking
 
-const QuestionInput = forwardRef(function QuestionInput({ onAsk, disabled }, ref) {
-  const [value,     setValue]     = useState('')
+const QuestionInput = forwardRef(function QuestionInput({ onAsk, disabled, value, onChange }, ref) {
   const [shaking,   setShaking]   = useState(false)
   const [listening, setListening] = useState(false)
   const recRef      = useRef(null)
@@ -15,7 +14,7 @@ const QuestionInput = forwardRef(function QuestionInput({ onAsk, disabled }, ref
       rec.lang = 'en-US'; rec.interimResults = false
       rec.onresult = (e) => {
         const t = e.results[0][0].transcript
-        setListening(false); setValue(t); onAsk(t)
+        setListening(false); onChange(t); onAsk(t)
       }
       rec.onend  = () => setListening(false)
       rec.onerror= () => setListening(false)
@@ -37,7 +36,7 @@ const QuestionInput = forwardRef(function QuestionInput({ onAsk, disabled }, ref
       <input
         ref={ref}
         value={value}
-        onChange={e => setValue(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && submit()}
         placeholder="How many sheets of paper are in a tree?"
         maxLength={300}

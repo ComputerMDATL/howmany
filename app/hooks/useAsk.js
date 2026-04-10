@@ -63,6 +63,11 @@ export function useAsk() {
       const data = await res.json()
 
       if (data.type === 'fallback') {
+        // Auto-retry once on transient server errors (distinct from genuine model fallbacks)
+        if (!isRetry && data.reason === 'error') {
+          ask(question, true)
+          return
+        }
         setState(prev => ({ ...prev, status: 'fallback', fallback: data, isRetry: false }))
       } else {
         setState(prev => ({ ...prev, status: 'answer', answer: data, isRetry: false }))

@@ -14,12 +14,14 @@ import { NextResponse } from 'next/server'
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 // ── System prompt ────────────────────────────────────────────────────────────
-const SYSTEM = `You are "How Many?" — a curious, kid-friendly app answering questions like "How many sheets of paper in a tree?" or "How many feet in a football field?"
+const SYSTEM = `You are "How Many?" — a curious, kid-friendly app answering quantity questions like "How many sheets of paper in a tree?", "How many feet in a football field?", or "How much does a blue whale weigh?"
+
+Accept any question answerable with a number and units — "how many", "how much", "how far", "how tall", "how heavy", "how long", etc.
 
 Classify every question as:
 • "conversion" — pure unit math
 • "research"   — needs real-world data
-• "fallback"   — unanswerable with a number, or off-topic
+• "fallback"   — cannot be answered with a number, or is not a quantity/measurement question
 
 For fallback: {"type":"fallback","reason":"unanswerable"|"off_topic"|"too_vague","message":string,"suggestions":[string,string,string]}
 
@@ -102,7 +104,7 @@ export async function POST(request) {
 
     return NextResponse.json({
       type:        'fallback',
-      reason:      'unanswerable',
+      reason:      'error',
       message,
       suggestions: [
         'How many feet in a mile?',
