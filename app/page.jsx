@@ -33,9 +33,15 @@ export default function Home() {
     const trimmed = q.trim()
     if (trimmed.length < 3) return
     setCurrentQ(trimmed)
+    setInputValue(trimmed)
     setShareOpen(false)
     ask(trimmed)
   }, [ask])
+
+  const handleCancel = useCallback(() => {
+    reset()
+    setTimeout(() => inputRef.current?.focus(), 100)
+  }, [reset])
 
   const handleReset = useCallback(() => {
     interstitial.maybeShow(() => {
@@ -65,7 +71,7 @@ export default function Home() {
         <ExampleChips onAsk={handleAsk} />
 
         {status === 'loading' && (
-          <LoadingState thought={thought} isRetry={isRetry} />
+          <LoadingState thought={thought} isRetry={isRetry} onCancel={handleCancel} />
         )}
 
         {status === 'fallback' && fallback && (

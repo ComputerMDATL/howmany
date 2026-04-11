@@ -72,7 +72,7 @@ export function ExampleChips({ onAsk }) {
 }
 
 // ─── LoadingState ─────────────────────────────────────────────────────────────
-export function LoadingState({ thought, isRetry }) {
+export function LoadingState({ thought, isRetry, onCancel }) {
   return (
     <div className="text-center py-12">
       <div className="w-11 h-11 border-[3px] border-gold/10 border-t-gold rounded-full animate-spin mx-auto mb-3.5" />
@@ -80,6 +80,12 @@ export function LoadingState({ thought, isRetry }) {
         {isRetry ? 'Trying again…' : 'Looking that up...'}
       </p>
       <p className="text-gold text-xs mt-1.5 min-h-[17px]">{thought}</p>
+      <button
+        onClick={onCancel}
+        className="mt-5 bg-transparent border border-white/[0.13] text-muted rounded-full py-2 px-5 font-body text-xs cursor-pointer hover:border-cream hover:text-cream transition-all"
+      >
+        Cancel
+      </button>
     </div>
   )
 }
