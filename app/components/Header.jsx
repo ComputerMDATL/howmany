@@ -27,25 +27,44 @@ export function Header({ onReset }) {
 export default Header
 
 // ─── ExampleChips ─────────────────────────────────────────────────────────────
-const CHIPS = [
-  { emoji: '📄', label: 'sheets in a tree?',  q: 'How many sheets of paper are in a tree?' },
-  { emoji: '🏈', label: 'football field?',     q: 'How many feet in a football field?' },
-  { emoji: '📞', label: 'phone booth?',        q: 'How many people fit in a phone booth?' },
-  { emoji: '🥛', label: 'liters in a gallon?', q: 'How many liters in a gallon?' },
-  { emoji: '🌕', label: 'miles to the Moon?',  q: 'How many miles to the Moon?' },
-  { emoji: '✨', label: 'Milky Way stars?',     q: 'How many stars in the Milky Way?' },
+import { useMemo } from 'react'
+
+const QUESTION_POOL = [
+  { emoji: '📄', q: 'How many sheets of paper are in a tree?' },
+  { emoji: '🏈', q: 'How many feet in a football field?' },
+  { emoji: '📞', q: 'How many people fit in a phone booth?' },
+  { emoji: '🥛', q: 'How many liters in a gallon?' },
+  { emoji: '🌕', q: 'How many miles to the Moon?' },
+  { emoji: '✨', q: 'How many stars in the Milky Way?' },
+  { emoji: '🦷', q: 'How many teeth does a shark have?' },
+  { emoji: '❤️', q: 'How many times does your heart beat in a day?' },
+  { emoji: '🌊', q: 'How many gallons of water are in the ocean?' },
+  { emoji: '🍕', q: 'How many calories are in an average pizza?' },
+  { emoji: '🧱', q: 'How many bricks are in the Great Wall of China?' },
+  { emoji: '🐜', q: 'How many ants are on Earth?' },
+  { emoji: '📚', q: 'How many words are in the Harry Potter series?' },
+  { emoji: '💧', q: 'How many drops of water are in a teaspoon?' },
+  { emoji: '🏔️', q: 'How tall is Mount Everest in feet?' },
+  { emoji: '⚡', q: 'How many volts are in a lightning bolt?' },
+  { emoji: '🎵', q: 'How many songs are on Spotify?' },
+  { emoji: '🩸', q: 'How many blood cells are in the human body?' },
 ]
 
 export function ExampleChips({ onAsk }) {
+  const chips = useMemo(() => {
+    const shuffled = [...QUESTION_POOL].sort(() => Math.random() - 0.5)
+    return shuffled.slice(0, 6)
+  }, [])
+
   return (
     <div className="flex flex-wrap gap-2 mb-5">
-      {CHIPS.map(c => (
+      {chips.map(c => (
         <button
           key={c.q}
           onClick={() => onAsk(c.q)}
-          className="bg-white/[0.06] border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-muted font-body cursor-pointer hover:bg-gold/10 hover:border-gold/40 hover:text-gold transition-all whitespace-nowrap"
+          className="bg-white/[0.06] border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-muted font-body cursor-pointer hover:bg-gold/10 hover:border-gold/40 hover:text-gold transition-all"
         >
-          {c.emoji} {c.label}
+          {c.emoji} {c.q}
         </button>
       ))}
     </div>
