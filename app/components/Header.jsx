@@ -9,7 +9,7 @@ export function Header({ onReset }) {
           onReset ? 'cursor-pointer hover:opacity-80 transition-opacity' : '',
         ].join(' ')}
       >
-        How{' '}
+        Ask how{' '}
         <span className="font-normal italic text-cream">many</span>
         ?
       </h1>
@@ -73,7 +73,7 @@ const FB_META = {
   default:      { icon: '😅', title: "Hmm, couldn't answer that" },
 }
 
-export function FallbackCard({ data, onAsk }) {
+export function FallbackCard({ data, onAsk, onReset }) {
   const meta = FB_META[data.reason] || FB_META.default
   return (
     <div className="animate-slideUp bg-card border border-white/10 rounded-[22px] overflow-hidden">
@@ -99,6 +99,14 @@ export function FallbackCard({ data, onAsk }) {
             <span className="text-gold">→</span>
           </button>
         ))}
+      </div>
+      <div className="px-5 py-3.5 border-t border-white/[0.06]">
+        <button
+          onClick={onReset}
+          className="w-full bg-transparent border border-white/[0.13] text-muted rounded-full py-2.5 px-4 font-body text-xs cursor-pointer hover:border-cream hover:text-cream transition-all"
+        >
+          Ask another
+        </button>
       </div>
     </div>
   )

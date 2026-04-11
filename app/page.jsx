@@ -69,7 +69,7 @@ export default function Home() {
         )}
 
         {status === 'fallback' && fallback && (
-          <FallbackCard data={fallback} onAsk={handleAsk} />
+          <FallbackCard data={fallback} onAsk={handleAsk} onReset={handleReset} />
         )}
 
         {status === 'answer' && answer && (

@@ -56,7 +56,7 @@ export function drawShareCard(canvasEl, { question = '', answer = null, styleInd
   ctx.fillText('?', 60 + hw + ctx.measureText('many').width, 62)
 
   ctx.font = "500 30px 'DM Sans', sans-serif"; ctx.fillStyle = st.muted
-  let qLine = question || 'How many?'
+  let qLine = question || 'Ask how many?'
   while (ctx.measureText(qLine).width > W - 120 && qLine.length > 10) qLine = qLine.slice(0, -1)
   if (qLine.length < question.length) qLine = qLine.trimEnd() + '…'
   ctx.fillText(qLine, 60, 138)
