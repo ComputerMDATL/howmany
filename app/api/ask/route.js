@@ -88,13 +88,23 @@ async function getRelatedSuggestions(question) {
   if (!question?.trim()) return FALLBACK
   try {
     const res = await client.messages.create({
-      model:      'claude-haiku-4-5-20251001',
-      max_tokens: 120,
-      messages:   [{ role: 'user', content: `Give 3 short "How many…" questions closely related to: "${question}". Return only a JSON array of 3 strings, no markdown.` }],
+      model:      'claude-sonnet-4-6',
+      max_tokens: 200,
+      messages:   [{
+        role:    'user',
+        content: `Return ONLY a JSON array of 3 short "How many" questions related to this topic: "${question}"\nFormat: ["How many X?","How many Y?","How many Z?"]`,
+      }],
     })
-    const parsed = JSON.parse(res.content[0]?.text?.trim() ?? '')
-    if (Array.isArray(parsed) && parsed.length >= 3) return parsed.slice(0, 3)
-  } catch (_) { /* ignore */ }
+    const text = res.content[0]?.text ?? ''
+    console.log('[getRelatedSuggestions] raw:', text)
+    const match = text.match(/\[[\s\S]*?\]/)
+    if (match) {
+      const parsed = JSON.parse(match[0])
+      if (Array.isArray(parsed) && parsed.length >= 3) return parsed.slice(0, 3)
+    }
+  } catch (e) {
+    console.error('[getRelatedSuggestions] error:', e.message)
+  }
   return FALLBACK
 }
 
