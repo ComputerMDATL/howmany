@@ -1,7 +1,7 @@
 /**
  * app/api/ask/route.js
  *
- * This is the ENTIRE backend for How Many?
+ * This is the ENTIRE backend for Ask how Many?
  * It runs server-side on Vercel as a serverless function.
  * The ANTHROPIC_API_KEY never reaches the browser.
  *
@@ -14,7 +14,7 @@ import { NextResponse } from 'next/server'
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 // ── System prompt ────────────────────────────────────────────────────────────
-const SYSTEM = `You are "How Many?" — a curious, kid-friendly app answering quantity questions like "How many sheets of paper in a tree?", "How many feet in a football field?", or "How much does a blue whale weigh?"
+const SYSTEM = `You are "Ask how many?" — a curious, kid-friendly app answering quantity questions like "How many sheets of paper in a tree?", "How many feet in a football field?", or "How much does a blue whale weigh?"
 
 Accept any question answerable with a number and units — "how many", "how much", "how far", "how tall", "how heavy", "how long", etc.
 
@@ -78,10 +78,32 @@ async function askWithTools(question) {
   throw new Error('tool_loop_exceeded')
 }
 
+// ── Suggest related questions ─────────────────────────────────────────────────
+async function getRelatedSuggestions(question) {
+  const FALLBACK = [
+    'How many feet in a mile?',
+    'How many gallons in a bathtub?',
+    'How many bones are in the human body?',
+  ]
+  if (!question?.trim()) return FALLBACK
+  try {
+    const res = await client.messages.create({
+      model:      'claude-haiku-4-5-20251001',
+      max_tokens: 120,
+      messages:   [{ role: 'user', content: `Give 3 short "How many…" questions closely related to: "${question}". Return only a JSON array of 3 strings, no markdown.` }],
+    })
+    const parsed = JSON.parse(res.content[0]?.text?.trim() ?? '')
+    if (Array.isArray(parsed) && parsed.length >= 3) return parsed.slice(0, 3)
+  } catch (_) { /* ignore */ }
+  return FALLBACK
+}
+
 // ── POST /api/ask ─────────────────────────────────────────────────────────────
 export async function POST(request) {
+  let question = ''
   try {
-    const { question } = await request.json()
+    const body = await request.json()
+    question   = body.question ?? ''
 
     if (!question || typeof question !== 'string' || question.trim().length < 3) {
       return NextResponse.json({ error: 'invalid_question' }, { status: 400 })
@@ -102,15 +124,13 @@ export async function POST(request) {
       err.message === 'tool_loop_exceeded' ? 'Something went wrong. Try rephrasing.' :
       'Something went wrong. Try again in a moment.'
 
+    const suggestions = await getRelatedSuggestions(question)
+
     return NextResponse.json({
-      type:        'fallback',
-      reason:      'error',
+      type: 'fallback',
+      reason: 'error',
       message,
-      suggestions: [
-        'How many feet in a mile?',
-        'How many gallons in a bathtub?',
-        'How many bones are in the human body?',
-      ],
+      suggestions,
     })
   }
 }
