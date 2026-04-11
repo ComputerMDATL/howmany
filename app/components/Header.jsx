@@ -32,22 +32,24 @@ import { useMemo } from 'react'
 const QUESTION_POOL = [
   { emoji: '📄', q: 'How many sheets of paper are in a tree?' },
   { emoji: '🏈', q: 'How many feet in a football field?' },
-  { emoji: '📞', q: 'How many people fit in a phone booth?' },
-  { emoji: '🥛', q: 'How many liters in a gallon?' },
-  { emoji: '🌕', q: 'How many miles to the Moon?' },
-  { emoji: '✨', q: 'How many stars in the Milky Way?' },
-  { emoji: '🦷', q: 'How many teeth does a shark have?' },
-  { emoji: '❤️', q: 'How many times does your heart beat in a day?' },
+  { emoji: '🥛', q: 'How many liters are in a gallon?' },
+  { emoji: '🌕', q: 'How many miles away is the Moon?' },
+  { emoji: '✨', q: 'How many stars are in the Milky Way?' },
+  { emoji: '🦷', q: 'How many teeth does a great white shark have?' },
+  { emoji: '❤️', q: 'How many times does the heart beat in a day?' },
   { emoji: '🌊', q: 'How many gallons of water are in the ocean?' },
-  { emoji: '🍕', q: 'How many calories are in an average pizza?' },
-  { emoji: '🧱', q: 'How many bricks are in the Great Wall of China?' },
+  { emoji: '🍕', q: 'How many calories are in a slice of pizza?' },
   { emoji: '🐜', q: 'How many ants are on Earth?' },
   { emoji: '📚', q: 'How many words are in the Harry Potter series?' },
   { emoji: '💧', q: 'How many drops of water are in a teaspoon?' },
   { emoji: '🏔️', q: 'How tall is Mount Everest in feet?' },
   { emoji: '⚡', q: 'How many volts are in a lightning bolt?' },
-  { emoji: '🎵', q: 'How many songs are on Spotify?' },
   { emoji: '🩸', q: 'How many blood cells are in the human body?' },
+  { emoji: '🧠', q: 'How many neurons are in the human brain?' },
+  { emoji: '🌍', q: 'How many people are on Earth?' },
+  { emoji: '🦴', q: 'How many bones are in the human body?' },
+  { emoji: '🏊', q: 'How many gallons of water are in an Olympic swimming pool?' },
+  { emoji: '🌳', q: 'How many trees are on Earth?' },
 ]
 
 export function ExampleChips({ onAsk }) {
@@ -57,16 +59,21 @@ export function ExampleChips({ onAsk }) {
   }, [])
 
   return (
-    <div className="flex flex-wrap gap-2 mb-5">
-      {chips.map(c => (
-        <button
-          key={c.q}
-          onClick={() => onAsk(c.q)}
-          className="bg-white/[0.06] border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-muted font-body cursor-pointer hover:bg-gold/10 hover:border-gold/40 hover:text-gold transition-all"
-        >
-          {c.emoji} {c.q}
-        </button>
-      ))}
+    <div className="mb-5">
+      <p className="text-[10px] text-muted font-semibold tracking-widest uppercase mb-2">
+        Try asking:
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {chips.map(c => (
+          <button
+            key={c.q}
+            onClick={() => onAsk(c.q)}
+            className="bg-gold/[0.08] border border-gold/25 rounded-full px-3.5 py-1.5 text-xs text-cream font-body cursor-pointer hover:bg-gold/20 hover:border-gold/60 transition-all"
+          >
+            {c.emoji} {c.q}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
