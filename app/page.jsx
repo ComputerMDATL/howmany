@@ -60,7 +60,7 @@ export default function Home() {
       <Interstitial {...interstitial} />
 
       <main className="relative z-10 max-w-[680px] mx-auto px-4 pb-16 pt-5">
-        <Header onReset={status !== 'idle' ? handleReset : undefined} />
+        <Header onReset={handleReset} />
         <QuestionInput
           ref={inputRef}
           value={inputValue}

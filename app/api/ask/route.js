@@ -46,43 +46,6 @@ Q:"What is the capital of France?"
 // Cached system block — Anthropic caches the prompt after first use (5-min TTL)
 const SYSTEM_BLOCK = [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }]
 
-// ── Tool loop: run web-search turns, return answer or accumulated messages ────
-async function runToolPhase(question) {
-  const MAX_TOOL_TURNS = 5
-  const messages = [{ role: 'user', content: question }]
-
-  for (let turn = 0; turn < MAX_TOOL_TURNS; turn++) {
-    const response = await client.messages.create({
-      model:      'claude-sonnet-4-6',
-      max_tokens: 900,
-      system:     SYSTEM_BLOCK,
-      tools:      [{ type: 'web_search_20250305', name: 'web_search' }],
-      messages,
-    })
-
-    if (response.stop_reason === 'max_tokens') throw new Error('truncated')
-
-    const textBlocks = response.content.filter(b => b.type === 'text')
-    const toolBlocks = response.content.filter(b => b.type === 'tool_use')
-
-    // Model answered with text (no tool use) — return directly
-    if (response.stop_reason === 'end_turn' && textBlocks.length) {
-      return { directAnswer: textBlocks.map(b => b.text).join(''), messages: null }
-    }
-
-    // Feed tool results back and continue
-    messages.push({ role: 'assistant', content: response.content })
-    const toolResults = toolBlocks.map(b => ({
-      type: 'tool_result', tool_use_id: b.id, content: '',
-    }))
-    if (!toolResults.length) throw new Error('tool_loop_exceeded')
-    messages.push({ role: 'user', content: toolResults })
-  }
-
-  // All turns used tools — return accumulated messages for streaming final turn
-  return { directAnswer: null, messages }
-}
-
 // ── Suggest related questions (Haiku — fast, cheap, sufficient) ───────────────
 async function getRelatedSuggestions(question) {
   const FALLBACK = [
@@ -123,21 +86,15 @@ export async function POST(request) {
       return NextResponse.json({ error: 'invalid_question' }, { status: 400 })
     }
 
-    const { directAnswer, messages } = await runToolPhase(question.trim().slice(0, 300))
-
-    // Fast path: model answered without web search (conversions, well-known facts)
-    if (directAnswer) {
-      const cleaned = directAnswer.replace(/```json|```/g, '').trim()
-      return NextResponse.json(JSON.parse(cleaned))
-    }
-
-    // Research path: stream the final answer turn (after all tool results accumulated)
-    const stream  = client.messages.stream({
+    // Stream the answer directly — no tool loop needed.
+    // Claude Sonnet knows the answer to every kid-friendly "how many" question
+    // from training data. Removing web search eliminates empty-result failures
+    // and cuts response time significantly.
+    const stream = client.messages.stream({
       model:      'claude-sonnet-4-6',
       max_tokens: 900,
       system:     SYSTEM_BLOCK,
-      messages,
-      // No tools — force text-only response for the final answer
+      messages:   [{ role: 'user', content: question.trim().slice(0, 300) }],
     })
 
     const encoder = new TextEncoder()
@@ -167,15 +124,14 @@ export async function POST(request) {
     console.error('[/api/ask]', err.message, err.status ?? '', err.error ?? '')
 
     const message =
-      err.message === 'truncated'          ? 'Try a more specific question!' :
-      err.message === 'tool_loop_exceeded' ? 'Something went wrong. Try rephrasing.' :
+      err.message === 'truncated' ? 'Try a more specific question!' :
       'Something went wrong. Try again in a moment.'
 
     const suggestions = await getRelatedSuggestions(question)
 
     return NextResponse.json({
-      type: 'fallback',
-      reason: 'error',
+      type:    'fallback',
+      reason:  'error',
       message,
       suggestions,
     })

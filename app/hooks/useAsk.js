@@ -64,7 +64,7 @@ export function useAsk() {
       const contentType = res.headers.get('Content-Type') ?? ''
 
       if (contentType.includes('text/plain')) {
-        // Streaming response (research questions after web search)
+        // Streaming response — all normal answers arrive as a streamed JSON string
         setState(prev => ({ ...prev, thought: 'Writing the answer…' }))
         const reader  = res.body.getReader()
         const decoder = new TextDecoder()
@@ -77,7 +77,7 @@ export function useAsk() {
         const cleaned = buffer.replace(/```json|```/g, '').trim()
         data = JSON.parse(cleaned)
       } else {
-        // Direct JSON response (conversion questions, fallbacks)
+        // JSON response — only for server-side setup errors (rate limits, API down, etc.)
         data = await res.json()
       }
 
