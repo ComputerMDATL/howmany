@@ -43,13 +43,34 @@ const QuestionInput = forwardRef(function QuestionInput({ onAsk, disabled, value
         disabled={disabled}
         className={[
           'w-full bg-card2 border border-gold/20 rounded-app',
-          'px-5 py-4 pr-14 font-body text-[15px] text-cream',
+          'px-5 py-4 pr-20 font-body text-[15px] text-cream',
           'placeholder:text-muted outline-none input-gold',
           'transition-all duration-200',
           disabled ? 'opacity-60' : '',
           shaking  ? 'animate-shake' : '',
         ].join(' ')}
       />
+
+      {/* ? button — appears when the user has typed something */}
+      <button
+        tabIndex={-1}
+        onClick={() => {
+          if (!value.trimEnd().endsWith('?')) onChange(value.trimEnd() + '?')
+          ref?.current?.focus()
+        }}
+        title="Add question mark"
+        className={[
+          'absolute right-[3.2rem] top-1/2 -translate-y-1/2',
+          'w-7 h-7 rounded-full flex items-center justify-center',
+          'text-gold font-bold text-sm border border-gold/40 bg-card2',
+          'hover:bg-gold/20 hover:border-gold/70 cursor-pointer',
+          'transition-all duration-200',
+          value.trim() ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none',
+        ].join(' ')}
+      >
+        ?
+      </button>
+
       <button
         onClick={() => {
           if (!supported.current) return
