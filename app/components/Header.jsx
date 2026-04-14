@@ -27,7 +27,10 @@ export function Header({ onReset }) {
 export default Header
 
 // ─── ExampleChips ─────────────────────────────────────────────────────────────
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
+
+const CACHE_KEY = 'howmany_questions_v1'
+const CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
 
 const QUESTION_POOL = [
   { emoji: '📄', q: 'How many sheets of paper are in a tree?' },
@@ -39,11 +42,11 @@ const QUESTION_POOL = [
   { emoji: '❤️', q: 'How many times does the heart beat in a day?' },
   { emoji: '🌊', q: 'How many gallons of water are in the ocean?' },
   { emoji: '🍕', q: 'How many calories are in a slice of pizza?' },
-  { emoji: '🐜', q: 'How many ants are on Earth?' },
+  { emoji: '🏋️', q: 'How many pounds does an elephant weigh?' },
   { emoji: '📚', q: 'How many words are in the Harry Potter series?' },
   { emoji: '💧', q: 'How many drops of water are in a teaspoon?' },
   { emoji: '🏔️', q: 'How tall is Mount Everest in feet?' },
-  { emoji: '⚡', q: 'How many volts are in a lightning bolt?' },
+  { emoji: '🌡️', q: 'How many degrees Fahrenheit is boiling water?' },
   { emoji: '🩸', q: 'How many blood cells are in the human body?' },
   { emoji: '🧠', q: 'How many neurons are in the human brain?' },
   { emoji: '🌍', q: 'How many people are on Earth?' },
@@ -53,10 +56,36 @@ const QUESTION_POOL = [
 ]
 
 export function ExampleChips({ onAsk }) {
-  const chips = useMemo(() => {
-    const shuffled = [...QUESTION_POOL].sort(() => Math.random() - 0.5)
-    return shuffled.slice(0, 6)
+  const [pool, setPool] = useState(QUESTION_POOL)
+
+  useEffect(() => {
+    // Try localStorage cache first
+    try {
+      const cached = JSON.parse(localStorage.getItem(CACHE_KEY) ?? 'null')
+      if (cached && Date.now() - cached.ts < CACHE_TTL && Array.isArray(cached.questions) && cached.questions.length >= 6) {
+        setPool(cached.questions)
+        return
+      }
+    } catch {}
+
+    // Fetch fresh questions from the API
+    fetch('/api/questions')
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(({ questions }) => {
+        if (Array.isArray(questions) && questions.length >= 6) {
+          setPool(questions)
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), questions }))
+          } catch {}
+        }
+      })
+      .catch(() => { /* silently use static pool */ })
   }, [])
+
+  const chips = useMemo(() => {
+    const shuffled = [...pool].sort(() => Math.random() - 0.5)
+    return shuffled.slice(0, 6)
+  }, [pool])
 
   return (
     <div className="mb-5">

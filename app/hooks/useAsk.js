@@ -60,7 +60,26 @@ export function useAsk() {
       clearInterval(thoughtTimerRef.current)
       if (!res.ok) throw new Error('http_' + res.status)
 
-      const data = await res.json()
+      let data
+      const contentType = res.headers.get('Content-Type') ?? ''
+
+      if (contentType.includes('text/plain')) {
+        // Streaming response (research questions after web search)
+        setState(prev => ({ ...prev, thought: 'Writing the answer…' }))
+        const reader  = res.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
+        }
+        const cleaned = buffer.replace(/```json|```/g, '').trim()
+        data = JSON.parse(cleaned)
+      } else {
+        // Direct JSON response (conversion questions, fallbacks)
+        data = await res.json()
+      }
 
       if (data.type === 'fallback') {
         // Auto-retry once on transient server errors (distinct from genuine model fallbacks)

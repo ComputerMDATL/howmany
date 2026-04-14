@@ -4,12 +4,11 @@
  * This is the ENTIRE backend for Ask how Many?
  * It runs server-side on Vercel as a serverless function.
  * The ANTHROPIC_API_KEY never reaches the browser.
- *
- * In your pbt-next project, this is the equivalent of
- * calling your pbs-api backend — same idea, just built-in.
  */
 import Anthropic from '@anthropic-ai/sdk'
 import { NextResponse } from 'next/server'
+
+export const maxDuration = 30
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -44,16 +43,19 @@ Q:"What is the capital of France?"
 {"type":"fallback","reason":"off_topic","message":"I only answer 'How many' questions!","suggestions":["How many people live in Paris?","How many km wide is France?","How many countries are in Europe?"]}
 --- END EXAMPLES ---`
 
-// ── Multi-turn tool-use loop ──────────────────────────────────────────────────
-async function askWithTools(question) {
-  const MAX_TURNS = 6
+// Cached system block — Anthropic caches the prompt after first use (5-min TTL)
+const SYSTEM_BLOCK = [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }]
+
+// ── Tool loop: run web-search turns, return answer or accumulated messages ────
+async function runToolPhase(question) {
+  const MAX_TOOL_TURNS = 5
   const messages = [{ role: 'user', content: question }]
 
-  for (let turn = 0; turn < MAX_TURNS; turn++) {
+  for (let turn = 0; turn < MAX_TOOL_TURNS; turn++) {
     const response = await client.messages.create({
       model:      'claude-sonnet-4-6',
-      max_tokens: 1500,
-      system:     SYSTEM,
+      max_tokens: 900,
+      system:     SYSTEM_BLOCK,
       tools:      [{ type: 'web_search_20250305', name: 'web_search' }],
       messages,
     })
@@ -61,24 +63,27 @@ async function askWithTools(question) {
     if (response.stop_reason === 'max_tokens') throw new Error('truncated')
 
     const textBlocks = response.content.filter(b => b.type === 'text')
+    const toolBlocks = response.content.filter(b => b.type === 'tool_use')
+
+    // Model answered with text (no tool use) — return directly
     if (response.stop_reason === 'end_turn' && textBlocks.length) {
-      return textBlocks.map(b => b.text).join('')
+      return { directAnswer: textBlocks.map(b => b.text).join(''), messages: null }
     }
 
-    // Model called a tool — feed results back and loop
+    // Feed tool results back and continue
     messages.push({ role: 'assistant', content: response.content })
-    const toolResults = response.content
-      .filter(b => b.type === 'tool_use')
-      .map(b => ({ type: 'tool_result', tool_use_id: b.id, content: '' }))
-
-    if (!toolResults.length) break
+    const toolResults = toolBlocks.map(b => ({
+      type: 'tool_result', tool_use_id: b.id, content: '',
+    }))
+    if (!toolResults.length) throw new Error('tool_loop_exceeded')
     messages.push({ role: 'user', content: toolResults })
   }
 
-  throw new Error('tool_loop_exceeded')
+  // All turns used tools — return accumulated messages for streaming final turn
+  return { directAnswer: null, messages }
 }
 
-// ── Suggest related questions ─────────────────────────────────────────────────
+// ── Suggest related questions (Haiku — fast, cheap, sufficient) ───────────────
 async function getRelatedSuggestions(question) {
   const FALLBACK = [
     'How many feet in a mile?',
@@ -88,15 +93,14 @@ async function getRelatedSuggestions(question) {
   if (!question?.trim()) return FALLBACK
   try {
     const res = await client.messages.create({
-      model:      'claude-sonnet-4-6',
+      model:      'claude-haiku-4-5-20251001',
       max_tokens: 200,
       messages:   [{
         role:    'user',
         content: `Return ONLY a JSON array of 3 short "How many" questions related to this topic: "${question}"\nFormat: ["How many X?","How many Y?","How many Z?"]`,
       }],
     })
-    const text = res.content[0]?.text ?? ''
-    console.log('[getRelatedSuggestions] raw:', text)
+    const text  = res.content[0]?.text ?? ''
     const match = text.match(/\[[\s\S]*?\]/)
     if (match) {
       const parsed = JSON.parse(match[0])
@@ -119,16 +123,49 @@ export async function POST(request) {
       return NextResponse.json({ error: 'invalid_question' }, { status: 400 })
     }
 
-    const raw     = await askWithTools(question.trim().slice(0, 300))
-    const cleaned = raw.replace(/```json|```/g, '').trim()
-    const parsed  = JSON.parse(cleaned)
+    const { directAnswer, messages } = await runToolPhase(question.trim().slice(0, 300))
 
-    return NextResponse.json(parsed)
+    // Fast path: model answered without web search (conversions, well-known facts)
+    if (directAnswer) {
+      const cleaned = directAnswer.replace(/```json|```/g, '').trim()
+      return NextResponse.json(JSON.parse(cleaned))
+    }
+
+    // Research path: stream the final answer turn (after all tool results accumulated)
+    const stream  = client.messages.stream({
+      model:      'claude-sonnet-4-6',
+      max_tokens: 900,
+      system:     SYSTEM_BLOCK,
+      messages,
+      // No tools — force text-only response for the final answer
+    })
+
+    const encoder = new TextEncoder()
+    const readable = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const event of stream) {
+            if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+              controller.enqueue(encoder.encode(event.delta.text))
+            }
+          }
+          controller.close()
+        } catch (err) {
+          controller.error(err)
+        }
+      },
+    })
+
+    return new Response(readable, {
+      headers: {
+        'Content-Type':      'text/plain; charset=utf-8',
+        'X-Accel-Buffering': 'no',
+      },
+    })
 
   } catch (err) {
     console.error('[/api/ask]', err.message, err.status ?? '', err.error ?? '')
 
-    // Always return a graceful fallback — never a 500 to the user
     const message =
       err.message === 'truncated'          ? 'Try a more specific question!' :
       err.message === 'tool_loop_exceeded' ? 'Something went wrong. Try rephrasing.' :
