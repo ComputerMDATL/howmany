@@ -2,9 +2,9 @@
  * app/api/questions/route.js
  *
  * GET /api/questions
- * Returns { questions: [{emoji, q}, ...] } — 20 fresh chip questions.
- * Uses claude-haiku for speed; falls back to the static pool on any error.
- * Vercel edge caches the result for 1 hour (stale-while-revalidate 24h).
+ * Returns { questions: [{emoji, q}, ...] } — 20 fresh chip questions every call.
+ * No caching — Haiku generates a new varied set each page load.
+ * Falls back to the static pool on any error.
  */
 import Anthropic from '@anthropic-ai/sdk'
 import { NextResponse } from 'next/server'
@@ -13,7 +13,7 @@ export const maxDuration = 30
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-// Static fallback — updated pool (same as Header.jsx QUESTION_POOL)
+// Static fallback — shown while the API call is in progress or on error
 const STATIC_POOL = [
   { emoji: '📄', q: 'How many sheets of paper are in a tree?' },
   { emoji: '🏈', q: 'How many feet in a football field?' },
@@ -37,75 +37,85 @@ const STATIC_POOL = [
   { emoji: '🌳', q: 'How many trees are on Earth?' },
 ]
 
-const GENERATION_PROMPT = `Generate exactly 20 kid-friendly "How many" questions with these rules:
+// Full topic menu — Haiku picks 10 at random each call, guaranteeing variety
+const TOPIC_MENU = [
+  'Wild Animals & Predators', 'Ocean & Deep Sea Creatures', 'Insects & Bugs', 'Birds & Flight',
+  'Dinosaurs & Prehistoric Life', 'Pets & Domestic Animals', 'Reptiles & Amphibians',
+  'Space & Planets', 'Stars & Galaxies', 'Black Holes & Astronomy',
+  'Human Body & Biology', 'Brain & Senses', 'Bones & Muscles', 'Heart & Blood',
+  'Food & Cooking', 'Candy & Sweets', 'Fast Food & Snacks', 'Fruits & Vegetables',
+  'Sports Records & Championships', 'Olympic Games', 'Ball Sports', 'Extreme Sports',
+  'World Records & Guinness', 'Tallest & Biggest Things', 'Smallest & Tiniest Things',
+  'Geography & Countries', 'Mountains & Deserts', 'Rivers & Oceans',
+  'History & Ancient Civilizations', 'Castles & Kingdoms',
+  'Movies & Blockbusters', 'Video Games', 'Music & Instruments', 'Books & Authors',
+  'Science & Experiments', 'Chemistry & Elements', 'Electricity & Energy',
+  'Vehicles & Speed Records', 'Rockets & Space Travel', 'Ships & Submarines',
+  'Buildings & Architecture', 'Bridges & Tunnels',
+  'Money & Economics', 'Technology & Computers', 'Robots & AI',
+  'Plants & Flowers', 'Rainforests & Jungles', 'Weather & Natural Disasters',
+  'Microscopic World', 'Atoms & Particles',
+]
 
-1. Every question must have a single definitive numeric answer (not "it depends")
-2. Cover varied topics: nature, space, human body, food, sports, geography, science, animals
-3. Answers should be in a range kids can relate to — avoid anything over 1 trillion
-4. No questions about violence, politics, or things that are highly variable
-5. Each needs one relevant emoji
+function buildPrompt() {
+  const today = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  })
 
-GOOD examples: "How many bones are in the human body?", "How many liters in a gallon?", "How many calories in a banana?", "How many moons does Jupiter have?"
-BAD examples: "How many volts in a lightning bolt?" (too variable), "How many ants on Earth?" (too large/vague)
+  // Shuffle and pick 10 topic categories for this call
+  const shuffled = [...TOPIC_MENU].sort(() => Math.random() - 0.5)
+  const chosen   = shuffled.slice(0, 10).join(', ')
+
+  return `Today is ${today}.
+
+Generate exactly 20 fun, surprising quantity questions for curious kids aged 8–14.
+
+Focus ONLY on these 10 topic areas (2 questions each): ${chosen}
+
+Rules:
+- Every question must have ONE specific, checkable numeric answer
+- Answers must be between 2 and 500 billion (nothing larger, nothing zero)
+- Vary question starters: "How many", "How far", "How tall", "How long", "How fast", "How heavy", "How much"
+- Make questions feel surprising or delightful — not the obvious boring ones
+- No violence, death, wars, or scary topics
+- Each question needs one relevant emoji
 
 Return ONLY a JSON array, no markdown, no explanation:
-[{"emoji":"🦴","q":"How many bones are in the human body?"},{"emoji":"🥛","q":"How many liters are in a gallon?"},...18 more]`
+[{"emoji":"🦈","q":"How many teeth does a shark grow in its lifetime?"},{"emoji":"🎸","q":"How many strings does a standard guitar have?"},...18 more]`
+}
 
 async function generateQuestions() {
-  const MAX_TURNS = 2
-  const messages  = [{ role: 'user', content: GENERATION_PROMPT }]
+  const response = await client.messages.create({
+    model:      'claude-haiku-4-5-20251001',
+    max_tokens: 1000,
+    messages:   [{ role: 'user', content: buildPrompt() }],
+  })
 
-  for (let turn = 0; turn < MAX_TURNS; turn++) {
-    const response = await client.messages.create({
-      model:      'claude-haiku-4-5-20251001',
-      max_tokens: 800,
-      tools:      [{ type: 'web_search_20250305', name: 'web_search' }],
-      messages,
-    })
+  const text  = response.content.filter(b => b.type === 'text').map(b => b.text).join('')
+  const match = text.match(/\[[\s\S]*\]/)
+  if (!match) throw new Error('no_json')
 
-    const textBlocks = response.content.filter(b => b.type === 'text')
-    const toolBlocks = response.content.filter(b => b.type === 'tool_use')
+  const parsed = JSON.parse(match[0])
+  const valid  = parsed.filter(
+    item => item && typeof item.emoji === 'string' && typeof item.q === 'string' && item.q.trim().length > 5
+  )
+  if (valid.length < 10) throw new Error('too_few_questions')
 
-    if (response.stop_reason === 'end_turn' && textBlocks.length) {
-      const text  = textBlocks.map(b => b.text).join('')
-      const match = text.match(/\[[\s\S]*\]/)
-      if (match) {
-        const parsed = JSON.parse(match[0])
-        if (Array.isArray(parsed) && parsed.length >= 10) {
-          // Validate shape: each item must have emoji and q strings
-          const valid = parsed.filter(
-            item => item && typeof item.emoji === 'string' && typeof item.q === 'string'
-          )
-          if (valid.length >= 10) return valid.slice(0, 20)
-        }
-      }
-      throw new Error('invalid_format')
-    }
-
-    messages.push({ role: 'assistant', content: response.content })
-    const toolResults = toolBlocks.map(b => ({
-      type: 'tool_result', tool_use_id: b.id, content: '',
-    }))
-    if (!toolResults.length) break
-    messages.push({ role: 'user', content: toolResults })
-  }
-
-  throw new Error('generation_failed')
+  return valid.slice(0, 20)
 }
 
 export async function GET() {
   try {
     const questions = await generateQuestions()
+    // No caching — every page load gets a fresh, unique set
     return NextResponse.json({ questions }, {
-      headers: {
-        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
-      },
+      headers: { 'Cache-Control': 'no-store' },
     })
   } catch (err) {
     console.error('[/api/questions]', err.message)
     return NextResponse.json(
       { questions: STATIC_POOL, source: 'static' },
-      { headers: { 'Cache-Control': 'public, max-age=300' } }
+      { headers: { 'Cache-Control': 'no-store' } }
     )
   }
 }

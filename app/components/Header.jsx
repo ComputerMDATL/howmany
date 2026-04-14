@@ -29,9 +29,6 @@ export default Header
 // ─── ExampleChips ─────────────────────────────────────────────────────────────
 import { useMemo, useState, useEffect } from 'react'
 
-const CACHE_KEY = 'howmany_questions_v1'
-const CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
-
 const QUESTION_POOL = [
   { emoji: '📄', q: 'How many sheets of paper are in a tree?' },
   { emoji: '🏈', q: 'How many feet in a football field?' },
@@ -59,27 +56,14 @@ export function ExampleChips({ onAsk }) {
   const [pool, setPool] = useState(QUESTION_POOL)
 
   useEffect(() => {
-    // Try localStorage cache first
-    try {
-      const cached = JSON.parse(localStorage.getItem(CACHE_KEY) ?? 'null')
-      if (cached && Date.now() - cached.ts < CACHE_TTL && Array.isArray(cached.questions) && cached.questions.length >= 6) {
-        setPool(cached.questions)
-        return
-      }
-    } catch {}
-
-    // Fetch fresh questions from the API
+    // Fetch a fresh set of questions on every page load — no caching.
+    // Chips render instantly from QUESTION_POOL, then update silently when the API responds.
     fetch('/api/questions')
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(({ questions }) => {
-        if (Array.isArray(questions) && questions.length >= 6) {
-          setPool(questions)
-          try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), questions }))
-          } catch {}
-        }
+        if (Array.isArray(questions) && questions.length >= 6) setPool(questions)
       })
-      .catch(() => { /* silently use static pool */ })
+      .catch(() => { /* silently keep the static pool */ })
   }, [])
 
   const chips = useMemo(() => {
