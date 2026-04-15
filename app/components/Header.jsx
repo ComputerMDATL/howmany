@@ -52,7 +52,7 @@ const QUESTION_POOL = [
   { emoji: '🌳', q: 'How many trees are on Earth?' },
 ]
 
-export function ExampleChips({ onAsk }) {
+export function ExampleChips({ onAsk, rotationKey = 0 }) {
   const [pool, setPool] = useState(QUESTION_POOL)
 
   useEffect(() => {
@@ -69,7 +69,8 @@ export function ExampleChips({ onAsk }) {
   const chips = useMemo(() => {
     const shuffled = [...pool].sort(() => Math.random() - 0.5)
     return shuffled.slice(0, 6)
-  }, [pool])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pool, rotationKey])
 
   return (
     <div className="mb-5">
