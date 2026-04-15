@@ -17,16 +17,14 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        {/*
-          GOOGLE ADSENSE — uncomment when approved.
-          <script
-            async
-            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
-            crossOrigin="anonymous"
-          />
-        */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6335883588140435"
+          crossOrigin="anonymous"
+        />
         {children}
       </body>
     </html>
   )
 }
+
