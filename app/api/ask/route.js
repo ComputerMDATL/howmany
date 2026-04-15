@@ -86,6 +86,41 @@ export async function POST(request) {
       return NextResponse.json({ error: 'invalid_question' }, { status: 400 })
     }
 
+    // ── Kid-safe word filter ───────────────────────────────────────────────────
+    // Substring matches — these prefixes are unambiguously inappropriate
+    const BLOCKED_SUBSTRINGS = [
+      'porn', 'xxx', 'masturbat', 'pedophil', 'prostitut',
+      'fuck', 'asshole', 'cunt', 'onlyfans',
+      'how to kill', 'how to hurt',
+    ]
+    // Whole-word matches — avoids false positives (e.g. "seaweed", "sextet")
+    const BLOCKED_WORD_PATTERNS = [
+      /\bsex\b/, /\bsexual\b/, /\bnude\b/, /\bnaked\b/,
+      /\bpenis\b/, /\bvagina\b/, /\bbreast\b/, /\bcondom\b/, /\borgasm\b/,
+      /\brape\b/, /\bmolest\b/, /\bfetish\b/, /\berotic\b/, /\bhooker\b/,
+      /\bstripper\b/, /\bplayboy\b/, /\bshit\b/, /\bbitch\b/, /\bbastard\b/,
+      /\bcocaine\b/, /\bheroin\b/, /\bmeth\b/, /\bfentanyl\b/,
+      /\bweed\b/, /\bmarijuana\b/, /\bsuicide\b/, /\bself.harm\b/,
+    ]
+    const lower = question.trim().toLowerCase()
+    const isBlocked =
+      BLOCKED_SUBSTRINGS.some(term => lower.includes(term)) ||
+      BLOCKED_WORD_PATTERNS.some(re => re.test(lower))
+
+    if (isBlocked) {
+      return NextResponse.json({
+        type:    'fallback',
+        reason:  'off_topic',
+        message: "Oops! That question isn't something I can help with. Try asking something curious and fun!",
+        suggestions: [
+          'How many stars are in the Milky Way?',
+          'How many bones are in the human body?',
+          'How many steps to walk around the Earth?',
+        ],
+      })
+    }
+    // ── End kid-safe filter ────────────────────────────────────────────────────
+
     // Stream the answer directly — no tool loop needed.
     // Claude Sonnet knows the answer to every kid-friendly "how many" question
     // from training data. Removing web search eliminates empty-result failures
