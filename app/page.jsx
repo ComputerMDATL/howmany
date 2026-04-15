@@ -18,11 +18,10 @@ import Toast          from './components/Toast'
 export default function Home() {
   const { status, answer, fallback, thought, isRetry, ask, reset } = useAsk()
   const interstitial = useInterstitial()
-  const [currentQ,    setCurrentQ]   = useState('')
-  const [inputValue,  setInputValue]  = useState('')
-  const [shareOpen,   setShareOpen]  = useState(false)
-  const [toast,       setToast]      = useState(null)
-  const [chipRotation, setChipRotation] = useState(0)
+  const [currentQ,   setCurrentQ]  = useState('')
+  const [inputValue, setInputValue] = useState('')
+  const [shareOpen,  setShareOpen] = useState(false)
+  const [toast,     setToast]     = useState(null)
   const inputRef = useRef(null)
 
   const showToast = useCallback((msg) => {
@@ -36,7 +35,6 @@ export default function Home() {
     setCurrentQ(trimmed)
     setInputValue(trimmed)
     setShareOpen(false)
-    setChipRotation(n => n + 1)
     ask(trimmed)
   }, [ask])
 
@@ -51,7 +49,6 @@ export default function Home() {
       setShareOpen(false)
       setCurrentQ('')
       setInputValue('')
-      setChipRotation(n => n + 1)
       setTimeout(() => inputRef.current?.focus(), 100)
     })
   }, [interstitial, reset])
@@ -71,7 +68,7 @@ export default function Home() {
           onAsk={handleAsk}
           disabled={status === 'loading'}
         />
-        <ExampleChips onAsk={handleAsk} rotationKey={chipRotation} />
+        <ExampleChips onAsk={handleAsk} />
 
         {status === 'loading' && (
           <LoadingState thought={thought} isRetry={isRetry} onCancel={handleCancel} />

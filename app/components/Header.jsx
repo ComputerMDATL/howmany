@@ -52,8 +52,9 @@ const QUESTION_POOL = [
   { emoji: '🌳', q: 'How many trees are on Earth?' },
 ]
 
-export function ExampleChips({ onAsk, rotationKey = 0 }) {
+export function ExampleChips({ onAsk }) {
   const [pool, setPool] = useState(QUESTION_POOL)
+  const [reshuffleKey, setReshuffleKey] = useState(0)
 
   useEffect(() => {
     // Fetch a fresh set of questions on every page load — no caching.
@@ -70,13 +71,22 @@ export function ExampleChips({ onAsk, rotationKey = 0 }) {
     const shuffled = [...pool].sort(() => Math.random() - 0.5)
     return shuffled.slice(0, 6)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pool, rotationKey])
+  }, [pool, reshuffleKey])
 
   return (
     <div className="mb-5">
-      <p className="text-[10px] text-muted font-semibold tracking-widest uppercase mb-2">
-        Try asking:
-      </p>
+      <div className="flex items-center gap-2 mb-2">
+        <p className="text-[10px] text-muted font-semibold tracking-widest uppercase">
+          Try asking:
+        </p>
+        <button
+          onClick={() => setReshuffleKey(k => k + 1)}
+          className="text-[10px] text-muted/60 hover:text-gold transition-colors cursor-pointer"
+          title="Shuffle questions"
+        >
+          ↺ Re-shuffle
+        </button>
+      </div>
       <div className="flex flex-wrap gap-2">
         {chips.map(c => (
           <button
