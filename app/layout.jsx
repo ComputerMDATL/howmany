@@ -1,4 +1,5 @@
 import './globals.css'
+import { Analytics } from '@vercel/analytics/react'
 
 export const metadata = {
   title: 'Ask how many?',
@@ -23,6 +24,7 @@ export default function RootLayout({ children }) {
           crossOrigin="anonymous"
         />
         {children}
+        <Analytics />
       </body>
     </html>
   )
