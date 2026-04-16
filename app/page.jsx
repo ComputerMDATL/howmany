@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
-import { LanguageProvider } from './context/LanguageContext'
+import { useState, useRef, useCallback, useEffect } from 'react'
+import { LanguageProvider, useLang } from './context/LanguageContext'
 import { useAsk }          from './hooks/useAsk'
 import { useInterstitial } from './hooks/useInterstitial'
 import Stars          from './components/Stars'
@@ -28,13 +28,37 @@ export default function Home() {
 }
 
 function HomeInner() {
-  const { status, answer, fallback, thought, isRetry, ask, reset } = useAsk()
+  const { status, answer, fallback, thought, isRetry, ask, reset, patchAnswer } = useAsk()
   const interstitial = useInterstitial()
   const [currentQ,   setCurrentQ]  = useState('')
   const [inputValue, setInputValue] = useState('')
   const [shareOpen,  setShareOpen] = useState(false)
   const [toast,     setToast]     = useState(null)
   const inputRef = useRef(null)
+
+  const { lang } = useLang()
+  const isFirstLang = useRef(true)
+  useEffect(() => {
+    if (isFirstLang.current) { isFirstLang.current = false; return }
+    if (!currentQ) return
+
+    if (status === 'answer' && answer) {
+      // Translate the stored result in-place via Haiku (~0.5s) — no need to
+      // redo the math. Fall back to a full re-ask if translation fails.
+      fetch('/api/translate', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ answer, lang }),
+      })
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(patch => patchAnswer(patch))
+        .catch(() => ask(currentQ))
+    } else if (status === 'fallback') {
+      // Suggestions are question strings — re-ask so they're naturally phrased
+      ask(currentQ)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang])
 
   const showToast = useCallback((msg) => {
     setToast(msg)

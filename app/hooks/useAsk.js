@@ -135,5 +135,10 @@ export function useAsk() {
     })
   }, [])
 
-  return { ...state, ask, reset }
+  // Merge translated fields into the existing answer without re-fetching
+  const patchAnswer = useCallback((patch) => {
+    setState(prev => ({ ...prev, answer: { ...prev.answer, ...patch } }))
+  }, [])
+
+  return { ...state, ask, reset, patchAnswer }
 }
