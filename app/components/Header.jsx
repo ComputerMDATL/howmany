@@ -102,15 +102,20 @@ export function ExampleChips({ onAsk }) {
   const [pool, setPool] = useState(staticPool)
   const [reshuffleKey, setReshuffleKey] = useState(0)
 
-  // Re-fetch (and reset to static) whenever lang changes
+  // Re-fetch whenever lang changes. AbortController cancels any in-flight
+  // request from the previous language so stale results never overwrite.
   useEffect(() => {
+    const controller = new AbortController()
     setPool(staticPool)
-    fetch(`/api/questions?lang=${lang}`)
+    fetch(`/api/questions?lang=${lang}`, { signal: controller.signal })
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(({ questions }) => {
         if (Array.isArray(questions) && questions.length >= 6) setPool(questions)
       })
-      .catch(() => { /* silently keep the static pool */ })
+      .catch(err => {
+        if (err.name !== 'AbortError') { /* silently keep the static pool */ }
+      })
+    return () => controller.abort()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang])
 

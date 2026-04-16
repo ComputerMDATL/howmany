@@ -16,7 +16,18 @@ import Interstitial   from './components/Interstitial'
 import SharePanel     from './components/SharePanel'
 import Toast          from './components/Toast'
 
+// LanguageProvider must wrap everything so hooks inside can read the context.
+// HomeInner is a separate component so useAsk / useInterstitial are called
+// *inside* the provider boundary.
 export default function Home() {
+  return (
+    <LanguageProvider>
+      <HomeInner />
+    </LanguageProvider>
+  )
+}
+
+function HomeInner() {
   const { status, answer, fallback, thought, isRetry, ask, reset } = useAsk()
   const interstitial = useInterstitial()
   const [currentQ,   setCurrentQ]  = useState('')
@@ -55,7 +66,7 @@ export default function Home() {
   }, [interstitial, reset])
 
   return (
-    <LanguageProvider>
+    <>
       <Stars />
       <Toast message={toast} />
       <Interstitial {...interstitial} />
@@ -100,6 +111,6 @@ export default function Home() {
           </>
         )}
       </main>
-    </LanguageProvider>
+    </>
   )
 }
