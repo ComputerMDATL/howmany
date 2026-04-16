@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { useLang } from '../context/LanguageContext'
 
 // ─── Header ──────────────────────────────────────────────────────────────────
