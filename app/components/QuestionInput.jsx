@@ -1,7 +1,9 @@
 'use client'
-import { forwardRef, useState, useRef, useEffect } from 'react' // useState kept for shaking
+import { forwardRef, useState, useRef, useEffect } from 'react'
+import { useLang } from '../context/LanguageContext'
 
 const QuestionInput = forwardRef(function QuestionInput({ onAsk, disabled, value, onChange }, ref) {
+  const { lang, t } = useLang()
   const [shaking,   setShaking]   = useState(false)
   const [listening, setListening] = useState(false)
   const recRef      = useRef(null)
@@ -11,17 +13,20 @@ const QuestionInput = forwardRef(function QuestionInput({ onAsk, disabled, value
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SR  = window.SpeechRecognition || window.webkitSpeechRecognition
       const rec = new SR()
-      rec.lang = 'en-US'; rec.interimResults = false
+      rec.lang           = lang === 'es' ? 'es-ES' : 'en-US'
+      rec.interimResults = false
       rec.onresult = (e) => {
-        const t = e.results[0][0].transcript
-        setListening(false); onChange(t); onAsk(t)
+        const transcript = e.results[0][0].transcript
+        setListening(false); onChange(transcript); onAsk(transcript)
       }
       rec.onend  = () => setListening(false)
       rec.onerror= () => setListening(false)
-      recRef.current   = rec
+      recRef.current    = rec
       supported.current = true
     }
-  }, [onAsk])
+  // Recreate recognition with correct language when lang changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang, onAsk])
 
   const shake = () => { setShaking(true); setTimeout(() => setShaking(false), 500) }
 
@@ -38,7 +43,7 @@ const QuestionInput = forwardRef(function QuestionInput({ onAsk, disabled, value
         value={value}
         onChange={e => onChange(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && submit()}
-        placeholder="How many sheets of paper are in a tree?"
+        placeholder={t('placeholder')}
         maxLength={300}
         disabled={disabled}
         className={[
@@ -77,7 +82,7 @@ const QuestionInput = forwardRef(function QuestionInput({ onAsk, disabled, value
           if (listening) { recRef.current.stop(); setListening(false); return }
           setListening(true); recRef.current.start()
         }}
-        title={supported.current ? 'Tap to speak' : 'Voice requires Chrome or Edge'}
+        title={supported.current ? t('voiceTitle') : t('voiceUnsupported')}
         className={[
           'absolute right-2.5 top-1/2 -translate-y-1/2',
           'w-9 h-9 rounded-full border-none flex items-center text-sky text-base',

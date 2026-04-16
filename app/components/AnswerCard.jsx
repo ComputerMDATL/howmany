@@ -1,6 +1,7 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import { drawVisualizer } from '../lib/visualizer'
+import { useLang } from '../context/LanguageContext'
 
 function safeHtml(s) {
   const d = document.createElement('div')
@@ -10,16 +11,17 @@ function safeHtml(s) {
     .replace(/&lt;em&gt;/g, '<em>').replace(/&lt;\/em&gt;/g, '</em>')
 }
 
-const TABS = [
-  { id: 'steps',  label: '🔢 The math'   },
-  { id: 'visual', label: '📊 Picture it' },
-  { id: 'fact',   label: '💡 Fun fact'   },
-]
-
 export default function AnswerCard({ question, answer, onReset, onShare, interstitial }) {
+  const { t } = useLang()
   const [activeTab, setActiveTab] = useState('steps')
   const canvasRef  = useRef(null)
   const [caption,  setCaption]   = useState('')
+
+  const TABS = [
+    { id: 'steps',  label: t('tab_math')   },
+    { id: 'visual', label: t('tab_visual') },
+    { id: 'fact',   label: t('tab_fact')   },
+  ]
 
   // Reset to first tab whenever a new answer arrives
   useEffect(() => { setActiveTab('steps') }, [answer])
@@ -51,26 +53,26 @@ export default function AnswerCard({ question, answer, onReset, onShare, interst
         </p>
         {answer.type === 'research' && answer.range && (
           <span className="inline-flex items-center gap-1.5 mt-2 bg-teal/10 border border-teal/[0.22] rounded-full px-3 py-1 text-[11px] text-teal">
-            ~ Est. range: {answer.range.low}–{answer.range.high} {answer.range.unit || ''}
+            {t('est_range')} {answer.range.low}–{answer.range.high} {answer.range.unit || ''}
           </span>
         )}
       </div>
 
       {/* ── Tabs ── */}
       <div className="flex border-b border-white/[0.06]">
-        {TABS.map(t => (
+        {TABS.map(tab => (
           <button
-            key={t.id}
-            onClick={() => setActiveTab(t.id)}
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
             className={[
               'flex-1 py-2.5 px-1.5 text-center text-xs font-medium font-body',
               'border-b-2 transition-all cursor-pointer',
-              activeTab === t.id
+              activeTab === tab.id
                 ? 'text-gold border-gold'
                 : 'text-muted border-transparent hover:text-cream',
             ].join(' ')}
           >
-            {t.label}
+            {tab.label}
           </button>
         ))}
       </div>
@@ -112,19 +114,17 @@ export default function AnswerCard({ question, answer, onReset, onShare, interst
         {/* Fun fact */}
         {activeTab === 'fact' && (
           <div>
-            {/* Fun fact box */}
             <div className="bg-teal/[0.06] border border-teal/[0.18] rounded-xl px-4 py-3.5">
               <p className="text-[10px] text-teal font-semibold tracking-widest uppercase mb-1.5">
-                Did you know?
+                {t('did_you_know')}
               </p>
               <p className="text-[13px] text-cream/82 leading-relaxed">{answer.funFact}</p>
             </div>
 
-            {/* Sources */}
             {(answer.sources || []).length > 0 && (
               <div className="mt-3.5 pt-3 border-t border-white/[0.06]">
                 <p className="text-[10px] text-muted font-semibold tracking-widest uppercase mb-2">
-                  Sources
+                  {t('sources')}
                 </p>
                 {answer.sources.map((s, i) => (
                   <div key={i} className="flex gap-1.5 items-start mb-1">
@@ -135,9 +135,7 @@ export default function AnswerCard({ question, answer, onReset, onShare, interst
               </div>
             )}
 
-            {/* AD SLOT 3 — Native ad in Fun Fact tab
-                In production replace this div with a real AdSense <ins> tag.
-                Keep data-tag-for-child-directed-treatment="1" for COPPA. */}
+            {/* AD SLOT 3 — Native ad in Fun Fact tab */}
             <div className="mt-3.5 bg-gold/[0.04] border border-gold/[0.12] rounded-xl px-4 py-3.5 flex gap-3">
               <span className="text-[9px] text-muted font-semibold tracking-widest uppercase bg-white/[0.06] px-1.5 py-0.5 rounded self-start flex-shrink-0">
                 Ad
@@ -169,16 +167,16 @@ export default function AnswerCard({ question, answer, onReset, onShare, interst
           onClick={onShare}
           className="flex-1 bg-gold text-sky border-none rounded-full py-2.5 px-4 font-body text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-1.5 hover:bg-gold2 hover:scale-[1.02] transition-all"
         >
-          🎴 Share this answer
+          {t('share_answer')}
         </button>
         <button
           onClick={onReset}
           className="bg-transparent border border-white/[0.13] text-muted rounded-full py-2.5 px-4 font-body text-xs cursor-pointer whitespace-nowrap hover:border-cream hover:text-cream transition-all"
         >
-          Ask another
+          {t('ask_another')}
           {interstitial.showingCounter && (
             <span className="text-[10px] opacity-50 ml-1">
-              · ad in {interstitial.untilNext}
+              · {t('ad_in')} {interstitial.untilNext}
             </span>
           )}
         </button>

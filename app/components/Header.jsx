@@ -1,5 +1,12 @@
+'use client'
+
+import { useMemo, useState, useEffect } from 'react'
+import { useLang } from '../context/LanguageContext'
+
 // ─── Header ──────────────────────────────────────────────────────────────────
 export function Header({ onReset }) {
+  const { lang, toggleLang, t } = useLang()
+
   return (
     <div className="text-center py-7">
       <h1
@@ -14,12 +21,28 @@ export function Header({ onReset }) {
         ?
       </h1>
       <p className="text-sm text-muted mt-1.5 tracking-wide">
-        Ask anything. Get a real answer with the math shown.
+        {t('subtitle')}
       </p>
-      <div className="mt-2">
+      <div className="mt-2 flex items-center justify-center gap-2">
         <span className="inline-flex items-center gap-1.5 bg-teal/10 border border-teal/20 rounded-full px-3 py-0.5 text-[10px] text-teal font-semibold">
           ✓ v6 · Next.js + Tailwind
         </span>
+
+        {/* EN | ES language toggle */}
+        <button
+          onClick={toggleLang}
+          title={lang === 'en' ? 'Cambiar a español' : 'Switch to English'}
+          className="inline-flex items-center bg-card2 border border-white/[0.12] rounded-full overflow-hidden text-[10px] font-semibold cursor-pointer hover:border-gold/40 transition-colors"
+        >
+          <span className={[
+            'px-2.5 py-0.5 transition-colors',
+            lang === 'en' ? 'bg-gold text-sky' : 'text-muted',
+          ].join(' ')}>EN</span>
+          <span className={[
+            'px-2.5 py-0.5 transition-colors',
+            lang === 'es' ? 'bg-gold text-sky' : 'text-muted',
+          ].join(' ')}>ES</span>
+        </button>
       </div>
     </div>
   )
@@ -27,9 +50,7 @@ export function Header({ onReset }) {
 export default Header
 
 // ─── ExampleChips ─────────────────────────────────────────────────────────────
-import { useMemo, useState, useEffect } from 'react'
-
-const QUESTION_POOL = [
+const QUESTION_POOL_EN = [
   { emoji: '📄', q: 'How many sheets of paper are in a tree?' },
   { emoji: '🏈', q: 'How many feet in a football field?' },
   { emoji: '🥛', q: 'How many liters are in a gallon?' },
@@ -52,20 +73,46 @@ const QUESTION_POOL = [
   { emoji: '🌳', q: 'How many trees are on Earth?' },
 ]
 
+const QUESTION_POOL_ES = [
+  { emoji: '📄', q: '¿Cuántas hojas de papel hay en un árbol?' },
+  { emoji: '🏈', q: '¿Cuántos pies hay en un campo de fútbol americano?' },
+  { emoji: '🥛', q: '¿Cuántos litros hay en un galón?' },
+  { emoji: '🌕', q: '¿A cuántas millas está la Luna?' },
+  { emoji: '✨', q: '¿Cuántas estrellas hay en la Vía Láctea?' },
+  { emoji: '🦷', q: '¿Cuántos dientes tiene un gran tiburón blanco?' },
+  { emoji: '❤️', q: '¿Cuántas veces late el corazón en un día?' },
+  { emoji: '🌊', q: '¿Cuántos galones de agua hay en el océano?' },
+  { emoji: '🍕', q: '¿Cuántas calorías hay en una porción de pizza?' },
+  { emoji: '🏋️', q: '¿Cuántas libras pesa un elefante?' },
+  { emoji: '📚', q: '¿Cuántas palabras hay en la saga de Harry Potter?' },
+  { emoji: '💧', q: '¿Cuántas gotas de agua hay en una cucharadita?' },
+  { emoji: '🏔️', q: '¿Cuántos pies de altura tiene el Monte Everest?' },
+  { emoji: '🌡️', q: '¿A cuántos grados Fahrenheit hierve el agua?' },
+  { emoji: '🩸', q: '¿Cuántas células sanguíneas hay en el cuerpo humano?' },
+  { emoji: '🧠', q: '¿Cuántas neuronas hay en el cerebro humano?' },
+  { emoji: '🌍', q: '¿Cuántas personas hay en la Tierra?' },
+  { emoji: '🦴', q: '¿Cuántos huesos hay en el cuerpo humano?' },
+  { emoji: '🏊', q: '¿Cuántos galones de agua caben en una piscina olímpica?' },
+  { emoji: '🌳', q: '¿Cuántos árboles hay en la Tierra?' },
+]
+
 export function ExampleChips({ onAsk }) {
-  const [pool, setPool] = useState(QUESTION_POOL)
+  const { lang, t } = useLang()
+  const staticPool = lang === 'es' ? QUESTION_POOL_ES : QUESTION_POOL_EN
+  const [pool, setPool] = useState(staticPool)
   const [reshuffleKey, setReshuffleKey] = useState(0)
 
+  // Re-fetch (and reset to static) whenever lang changes
   useEffect(() => {
-    // Fetch a fresh set of questions on every page load — no caching.
-    // Chips render instantly from QUESTION_POOL, then update silently when the API responds.
-    fetch('/api/questions')
+    setPool(staticPool)
+    fetch(`/api/questions?lang=${lang}`)
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(({ questions }) => {
         if (Array.isArray(questions) && questions.length >= 6) setPool(questions)
       })
       .catch(() => { /* silently keep the static pool */ })
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang])
 
   const chips = useMemo(() => {
     const shuffled = [...pool].sort(() => Math.random() - 0.5)
@@ -77,14 +124,14 @@ export function ExampleChips({ onAsk }) {
     <div className="mb-5">
       <div className="flex items-center gap-2 mb-2">
         <p className="text-[10px] text-muted font-semibold tracking-widest uppercase">
-          Try asking:
+          {t('tryAsking')}
         </p>
         <button
           onClick={() => setReshuffleKey(k => k + 1)}
           className="text-[10px] text-muted/60 hover:text-gold transition-colors cursor-pointer"
           title="Shuffle questions"
         >
-          ↺ Re-shuffle
+          {t('reshuffle')}
         </button>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -104,32 +151,35 @@ export function ExampleChips({ onAsk }) {
 
 // ─── LoadingState ─────────────────────────────────────────────────────────────
 export function LoadingState({ thought, isRetry, onCancel }) {
+  const { t } = useLang()
   return (
     <div className="text-center py-12">
       <div className="w-11 h-11 border-[3px] border-gold/10 border-t-gold rounded-full animate-spin mx-auto mb-3.5" />
       <p className="text-muted text-sm italic">
-        {isRetry ? 'Trying again…' : 'Looking that up...'}
+        {isRetry ? t('tryingAgain') : t('lookingUp')}
       </p>
       <p className="text-gold text-xs mt-1.5 min-h-[17px]">{thought}</p>
       <button
         onClick={onCancel}
         className="mt-5 bg-transparent border border-white/[0.13] text-muted rounded-full py-2 px-5 font-body text-xs cursor-pointer hover:border-cream hover:text-cream transition-all"
       >
-        Cancel
+        {t('cancel')}
       </button>
     </div>
   )
 }
 
 // ─── FallbackCard ─────────────────────────────────────────────────────────────
-const FB_META = {
-  off_topic:    { icon: '🧭', title: "That's not a 'how many' question!" },
-  unanswerable: { icon: '🤔', title: 'That one stumped me...' },
-  too_vague:    { icon: '🔍', title: 'Can you be more specific?' },
-  default:      { icon: '😅', title: "Hmm, couldn't answer that" },
-}
-
 export function FallbackCard({ data, onAsk, onReset }) {
+  const { t } = useLang()
+
+  const FB_META = {
+    off_topic:    { icon: t('fb_icon_off_topic'),    title: t('fb_off_topic')    },
+    unanswerable: { icon: t('fb_icon_unanswerable'), title: t('fb_unanswerable') },
+    too_vague:    { icon: t('fb_icon_too_vague'),    title: t('fb_too_vague')    },
+    default:      { icon: t('fb_icon_default'),      title: t('fb_default')      },
+  }
+
   const meta = FB_META[data.reason] || FB_META.default
   return (
     <div className="animate-slideUp bg-card border border-white/10 rounded-[22px] overflow-hidden">
@@ -142,7 +192,7 @@ export function FallbackCard({ data, onAsk, onReset }) {
       </div>
       <div className="p-5">
         <p className="text-[10px] text-muted font-semibold tracking-widest uppercase mb-2.5">
-          {data.reason === 'off_topic' ? 'Things I can answer:' : 'Try one of these:'}
+          {data.reason === 'off_topic' ? t('things_i_can_answer') : t('try_one_of_these')}
         </p>
         {(data.suggestions || []).map((s, i) => (
           <button
@@ -161,7 +211,7 @@ export function FallbackCard({ data, onAsk, onReset }) {
           onClick={onReset}
           className="w-full bg-transparent border border-white/[0.13] text-muted rounded-full py-2.5 px-4 font-body text-xs cursor-pointer hover:border-cream hover:text-cream transition-all"
         >
-          Ask another
+          {t('ask_another')}
         </button>
       </div>
     </div>

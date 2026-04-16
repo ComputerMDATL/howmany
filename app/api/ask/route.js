@@ -81,6 +81,7 @@ export async function POST(request) {
   try {
     const body = await request.json()
     question   = body.question ?? ''
+    const lang = body.lang === 'es' ? 'es' : 'en'
 
     if (!question || typeof question !== 'string' || question.trim().length < 3) {
       return NextResponse.json({ error: 'invalid_question' }, { status: 400 })
@@ -125,11 +126,15 @@ export async function POST(request) {
     // Claude Sonnet knows the answer to every kid-friendly "how many" question
     // from training data. Removing web search eliminates empty-result failures
     // and cuts response time significantly.
+    const userContent = lang === 'es'
+      ? `[Responde completamente en español]\n${question.trim().slice(0, 300)}`
+      : question.trim().slice(0, 300)
+
     const stream = client.messages.stream({
       model:      'claude-sonnet-4-6',
       max_tokens: 900,
       system:     SYSTEM_BLOCK,
-      messages:   [{ role: 'user', content: question.trim().slice(0, 300) }],
+      messages:   [{ role: 'user', content: userContent }],
     })
 
     const encoder = new TextEncoder()

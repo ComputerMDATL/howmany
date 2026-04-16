@@ -1,23 +1,26 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
-
-const THOUGHTS = [
-  'Crunching the numbers…',
-  'Consulting the universe…',
-  'Doing the math…',
-  'Researching real-world data…',
-  'Checking sources…',
-  'Calculating with care…',
-]
+import { useState, useRef, useCallback, useEffect } from 'react'
+import { useLang } from '../context/LanguageContext'
+import { translations } from '../lib/i18n'
 
 export function useAsk() {
+  const { lang } = useLang()
+
+  // Keep lang in a ref so the async ask callback can always read the latest value
+  // without needing to be recreated on every lang change.
+  const langRef = useRef(lang)
+  useEffect(() => { langRef.current = lang }, [lang])
+
+  const getThoughts = () => translations[langRef.current]?.thoughts ?? translations.en.thoughts
+  const tr = (key) => translations[langRef.current]?.[key] ?? translations.en[key] ?? key
+
   const [state, setState] = useState({
-    status:  'idle',   // idle | loading | answer | fallback
-    answer:  null,
+    status:   'idle',   // idle | loading | answer | fallback
+    answer:   null,
     fallback: null,
-    thought: THOUGHTS[0],
-    isRetry: false,
+    thought:  translations.en.thoughts[0],
+    isRetry:  false,
   })
 
   const controllerRef   = useRef(null)
@@ -27,6 +30,8 @@ export function useAsk() {
     question = question.trim()
     if (question.length < 3) return
 
+    const thoughts = getThoughts()
+
     // Cancel any in-flight request
     if (controllerRef.current) controllerRef.current.abort()
     controllerRef.current = new AbortController()
@@ -35,26 +40,25 @@ export function useAsk() {
     clearInterval(thoughtTimerRef.current)
     setState(prev => ({
       ...prev,
-      status:  'loading',
-      answer:  isRetry ? prev.answer : null,
+      status:   'loading',
+      answer:   isRetry ? prev.answer : null,
       fallback: null,
       isRetry,
-      thought: THOUGHTS[0],
+      thought:  thoughts[0],
     }))
 
     let ti = 0
     thoughtTimerRef.current = setInterval(() => {
-      ti = (ti + 1) % THOUGHTS.length
-      setState(prev => ({ ...prev, thought: THOUGHTS[ti] }))
+      ti = (ti + 1) % getThoughts().length
+      setState(prev => ({ ...prev, thought: getThoughts()[ti] }))
     }, 2200)
 
     try {
-      // /api/ask is a Next.js API route in the same project — no CORS, no Render
       const res = await fetch('/api/ask', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         signal,
-        body:    JSON.stringify({ question }),
+        body:    JSON.stringify({ question, lang: langRef.current }),
       })
 
       clearInterval(thoughtTimerRef.current)
@@ -64,8 +68,8 @@ export function useAsk() {
       const contentType = res.headers.get('Content-Type') ?? ''
 
       if (contentType.includes('text/plain')) {
-        // Streaming response — all normal answers arrive as a streamed JSON string
-        setState(prev => ({ ...prev, thought: 'Writing the answer…' }))
+        // Streaming response
+        setState(prev => ({ ...prev, thought: tr('writingAnswer') }))
         const reader  = res.body.getReader()
         const decoder = new TextDecoder()
         let buffer = ''
@@ -77,12 +81,10 @@ export function useAsk() {
         const cleaned = buffer.replace(/```json|```/g, '').trim()
         data = JSON.parse(cleaned)
       } else {
-        // JSON response — only for server-side setup errors (rate limits, API down, etc.)
         data = await res.json()
       }
 
       if (data.type === 'fallback') {
-        // Auto-retry once on transient server errors (distinct from genuine model fallbacks)
         if (!isRetry && data.reason === 'error') {
           ask(question, true)
           return
@@ -102,32 +104,35 @@ export function useAsk() {
       }
 
       const message =
-        err.message === 'http_429' ? "Too many questions right now — try again in a moment!" :
-        err.message === 'truncated' ? "Try a more specific question!" :
-        "Something went wrong. Try rephrasing."
+        err.message === 'http_429' ? tr('err_too_many') :
+        err.message === 'truncated' ? tr('err_too_specific') :
+        tr('err_went_wrong')
 
       setState(prev => ({
         ...prev,
-        status:  'fallback',
-        isRetry: false,
+        status:   'fallback',
+        isRetry:  false,
         fallback: {
-          type:    'fallback',
-          reason:  'unanswerable',
+          type:        'fallback',
+          reason:      'unanswerable',
           message,
-          suggestions: [
-            'How many feet in a mile?',
-            'How many gallons in a bathtub?',
-            'How many bones in the human body?',
-          ],
+          suggestions: tr('err_suggestions'),
         },
       }))
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const reset = useCallback(() => {
     if (controllerRef.current) controllerRef.current.abort()
     clearInterval(thoughtTimerRef.current)
-    setState({ status: 'idle', answer: null, fallback: null, thought: THOUGHTS[0], isRetry: false })
+    setState({
+      status:  'idle',
+      answer:  null,
+      fallback: null,
+      thought: translations[langRef.current]?.thoughts[0] ?? translations.en.thoughts[0],
+      isRetry: false,
+    })
   }, [])
 
   return { ...state, ask, reset }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import { LanguageProvider } from './context/LanguageContext'
 import { useAsk }          from './hooks/useAsk'
 import { useInterstitial } from './hooks/useInterstitial'
 import Stars          from './components/Stars'
@@ -54,7 +55,7 @@ export default function Home() {
   }, [interstitial, reset])
 
   return (
-    <>
+    <LanguageProvider>
       <Stars />
       <Toast message={toast} />
       <Interstitial {...interstitial} />
@@ -99,6 +100,6 @@ export default function Home() {
           </>
         )}
       </main>
-    </>
+    </LanguageProvider>
   )
 }

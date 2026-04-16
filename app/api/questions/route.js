@@ -57,14 +57,35 @@ const TOPIC_MENU = [
   'Microscopic World', 'Atoms & Particles',
 ]
 
-function buildPrompt() {
-  const today = new Date().toLocaleDateString('en-US', {
+function buildPrompt(lang = 'en') {
+  const locale = lang === 'es' ? 'es-ES' : 'en-US'
+  const today = new Date().toLocaleDateString(locale, {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   })
 
   // Shuffle and pick 10 topic categories for this call
   const shuffled = [...TOPIC_MENU].sort(() => Math.random() - 0.5)
   const chosen   = shuffled.slice(0, 10).join(', ')
+
+  if (lang === 'es') {
+    return `Hoy es ${today}.
+
+Genera exactamente 20 preguntas de cantidad divertidas y sorprendentes para niños curiosos de 8 a 14 años.
+
+Concéntrate SOLO en estas 10 áreas temáticas (2 preguntas cada una): ${chosen}
+
+Reglas:
+- Cada pregunta debe tener UNA respuesta numérica específica y verificable
+- Las respuestas deben estar entre 2 y 500 mil millones (nada más grande, nada cero)
+- Varía los inicios: "¿Cuántos", "¿Cuántas", "¿A qué distancia", "¿Cuánto mide", "¿Cuánto pesa", "¿Con qué velocidad"
+- Haz que las preguntas sean sorprendentes o deliciosas — no las obvias y aburridas
+- Sin violencia, muerte, guerras ni temas de miedo
+- Cada pregunta necesita un emoji relevante
+- Escribe todas las preguntas en español
+
+Devuelve SOLO un array JSON, sin markdown, sin explicación:
+[{"emoji":"🦈","q":"¿Cuántos dientes pierde un tiburón en su vida?"},{"emoji":"🎸","q":"¿Cuántas cuerdas tiene una guitarra estándar?"},...18 más]`
+  }
 
   return `Today is ${today}.
 
@@ -84,11 +105,11 @@ Return ONLY a JSON array, no markdown, no explanation:
 [{"emoji":"🦈","q":"How many teeth does a shark grow in its lifetime?"},{"emoji":"🎸","q":"How many strings does a standard guitar have?"},...18 more]`
 }
 
-async function generateQuestions() {
+async function generateQuestions(lang = 'en') {
   const response = await client.messages.create({
     model:      'claude-haiku-4-5-20251001',
     max_tokens: 1000,
-    messages:   [{ role: 'user', content: buildPrompt() }],
+    messages:   [{ role: 'user', content: buildPrompt(lang) }],
   })
 
   const text  = response.content.filter(b => b.type === 'text').map(b => b.text).join('')
@@ -104,9 +125,12 @@ async function generateQuestions() {
   return valid.slice(0, 20)
 }
 
-export async function GET() {
+export async function GET(request) {
+  const { searchParams } = new URL(request.url)
+  const lang = searchParams.get('lang') === 'es' ? 'es' : 'en'
+
   try {
-    const questions = await generateQuestions()
+    const questions = await generateQuestions(lang)
     // No caching — every page load gets a fresh, unique set
     return NextResponse.json({ questions }, {
       headers: { 'Cache-Control': 'no-store' },
