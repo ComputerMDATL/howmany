@@ -101,16 +101,22 @@ export function ExampleChips({ onAsk }) {
   const staticPool = lang === 'es' ? QUESTION_POOL_ES : QUESTION_POOL_EN
   const [pool, setPool] = useState(staticPool)
   const [reshuffleKey, setReshuffleKey] = useState(0)
+  // Fetched questions are staged here and only applied on the next Re-shuffle
+  // click — so the initial chips never jump after the API responds.
+  const fetchedRef = useRef(null)
 
   // Re-fetch whenever lang changes. AbortController cancels any in-flight
   // request from the previous language so stale results never overwrite.
   useEffect(() => {
     const controller = new AbortController()
     setPool(staticPool)
+    fetchedRef.current = null
     fetch(`/api/questions?lang=${lang}`, { signal: controller.signal })
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(({ questions }) => {
-        if (Array.isArray(questions) && questions.length >= 6) setPool(questions)
+        if (Array.isArray(questions) && questions.length >= 6) {
+          fetchedRef.current = questions  // stage — don't display yet
+        }
       })
       .catch(err => {
         if (err.name !== 'AbortError') { /* silently keep the static pool */ }
@@ -118,6 +124,14 @@ export function ExampleChips({ onAsk }) {
     return () => controller.abort()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang])
+
+  const handleReshuffle = () => {
+    if (fetchedRef.current) {
+      setPool(fetchedRef.current)  // swap in the fresh set on first shuffle
+      fetchedRef.current = null
+    }
+    setReshuffleKey(k => k + 1)
+  }
 
   const chips = useMemo(() => {
     const shuffled = [...pool].sort(() => Math.random() - 0.5)
@@ -132,7 +146,7 @@ export function ExampleChips({ onAsk }) {
           {t('tryAsking')}
         </p>
         <button
-          onClick={() => setReshuffleKey(k => k + 1)}
+          onClick={handleReshuffle}
           className="text-[10px] text-muted/60 hover:text-gold transition-colors cursor-pointer"
           title="Shuffle questions"
         >
