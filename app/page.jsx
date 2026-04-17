@@ -98,45 +98,40 @@ function HomeInner() {
       <main className="relative z-10 max-w-[680px] mx-auto px-4 pb-16 pt-5">
         <Header onReset={handleReset} />
 
-        <div className="w-full mb-5 mt-2 text-[14px] leading-snug">
-          <p className="text-cream/70">
-            Have you ever asked a question like{' '}
-            <span className="text-gold font-semibold text-[28px]">&ldquo;How many pizzas could fill a swimming pool?&rdquo;</span>{' '}
-            or{' '}
-            <span className="text-teal font-semibold text-[21px]">&ldquo;How many steps is it to the moon?&rdquo;</span>?
-            {' '}That&rsquo;s exactly what <span className="text-gold font-bold text-[25px]">Ask how many</span> is here for!
-            Type in any question about numbers, sizes, distances, or amounts — and our{' '}
-            <span className="text-coral font-semibold text-[28px]">AI brain</span> figures it out instantly, for free!
-          </p>
+        {(() => {
+          const [p1, p2, p3, p4] = t('intro')
+          return (
+            <div className="w-full mb-5 mt-2 text-[14px] leading-snug">
+              <p className="text-cream/70">
+                {p1.before}
+                <span className="text-gold font-semibold text-[28px]">&ldquo;{p1.q1}&rdquo;</span>{' '}
+                {p1.mid}
+                <span className="text-teal font-semibold text-[21px]">&ldquo;{p1.q2}&rdquo;</span>?
+                {' '}{p1.after}<span className="text-gold font-bold text-[25px]">{p1.brand}</span>{p1.end}
+                <span className="text-coral font-semibold text-[28px]">{p1.ai}</span>{p1.fin}
+              </p>
 
-          <p className="text-cream/70 mt-2">
-            You don&rsquo;t just get a number — you get the{' '}
-            <span className="text-teal font-semibold text-[21px]">full math breakdown</span>, shown step by step so you can actually see how it works.
-            Plus a{' '}
-            <span className="text-gold font-semibold text-[25px]">cool diagram</span> to help you picture the size,
-            and a{' '}
-            <span className="text-coral font-semibold text-[28px]">fun fact</span> that will blow your mind!
-            It&rsquo;s like having a super-smart calculator that also tells stories.
-          </p>
+              <p className="text-cream/70 mt-2">
+                {p2.before}<span className="text-teal font-semibold text-[21px]">{p2.math}</span>{p2.mid}
+                <span className="text-gold font-semibold text-[25px]">{p2.diagram}</span>{p2.mid2}
+                <span className="text-coral font-semibold text-[28px]">{p2.fact}</span>{p2.end}
+              </p>
 
-          <p className="text-cream/70 mt-2">
-            You can ask about{' '}
-            <span className="text-gold font-semibold text-[21px]">unit conversions</span>{' '}
-            (miles to kilometers, pounds to kilograms — easy!),{' '}
-            <span className="text-teal font-semibold text-[25px]">real-world comparisons</span>{' '}
-            (how heavy is a blue whale? how tall is the Eiffel Tower in bananas?),
-            or any wild{' '}
-            <span className="text-coral font-semibold text-[21px]">quantity question</span>{' '}
-            your brain can dream up.
-            Ask how many works in <span className="text-gold font-semibold text-[28px]">English</span> and <span className="text-teal font-semibold text-[25px]">Spanish</span> — just tap the flag at the top to switch!
-          </p>
+              <p className="text-cream/70 mt-2">
+                {p3.before}<span className="text-gold font-semibold text-[21px]">{p3.conv}</span>{p3.mid}
+                <span className="text-teal font-semibold text-[25px]">{p3.compare}</span>{p3.mid2}
+                <span className="text-coral font-semibold text-[21px]">{p3.qty}</span>{p3.mid3}
+                <span className="text-gold font-semibold text-[28px]">{p3.en}</span>{p3.mid4}
+                <span className="text-teal font-semibold text-[25px]">{p3.es}</span>{p3.end}
+              </p>
 
-          <p className="text-cream/70 mt-2">
-            Not sure where to start?{' '}
-            <span className="text-coral font-semibold text-[21px]">Tap one of the example questions</span> below and see the magic happen.
-            No sign-up, no accounts, <span className="text-gold font-semibold text-[28px]">totally free</span> — just big questions and even bigger answers. Let&rsquo;s go! 🚀
-          </p>
-        </div>
+              <p className="text-cream/70 mt-2">
+                {p4.before}<span className="text-coral font-semibold text-[21px]">{p4.cta}</span>{p4.mid}
+                <span className="text-gold font-semibold text-[28px]">{p4.free}</span>{p4.end}
+              </p>
+            </div>
+          )
+        })()}
 
         <QuestionInput
           ref={inputRef}
