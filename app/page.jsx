@@ -104,7 +104,7 @@ function HomeInner() {
             <span className="text-gold font-semibold">&ldquo;How many pizzas could fill a swimming pool?&rdquo;</span>{' '}
             or{' '}
             <span className="text-teal font-semibold">&ldquo;How many steps is it to the moon?&rdquo;</span>?
-            {' '}That&rsquo;s exactly what <span className="text-gold font-bold text-[15px]">HowMany</span> is here for!
+            {' '}That&rsquo;s exactly what <span className="text-gold font-bold text-[15px]">Ask how many</span> is here for!
             Type in any question about numbers, sizes, distances, or amounts — and our{' '}
             <span className="text-coral font-semibold">AI brain</span> figures it out instantly, for free!
           </p>
@@ -128,7 +128,7 @@ function HomeInner() {
             or any wild{' '}
             <span className="text-coral font-semibold">quantity question</span>{' '}
             your brain can dream up.
-            HowMany works in <span className="text-gold font-semibold">English</span> and <span className="text-teal font-semibold">Spanish</span> — just tap the flag at the top to switch!
+            Ask how many works in <span className="text-gold font-semibold">English</span> and <span className="text-teal font-semibold">Spanish</span> — just tap the flag at the top to switch!
           </p>
 
           <p className="text-cream/70 mt-3">
