@@ -97,6 +97,30 @@ function HomeInner() {
 
       <main className="relative z-10 max-w-[680px] mx-auto px-4 pb-16 pt-5">
         <Header onReset={handleReset} />
+
+        <div className="w-full mb-5 mt-2">
+          <p className="text-[13.5px] leading-relaxed text-cream/60">
+            <strong className="text-cream/80">HowMany</strong> is a free, instant answer engine for quantity and measurement questions — powered by AI.
+            Ever wondered how many gallons of water are in the ocean, how many steps it takes to walk a mile, or how many times your heart beats in a year?
+            Just type your question and HowMany breaks it down step by step, showing you the real math behind the answer so you actually understand where the number comes from.
+          </p>
+          <p className="text-[13.5px] leading-relaxed text-cream/60 mt-3">
+            Each answer includes a full mathematical breakdown, a visual diagram to make the scale easy to grasp, and a fun fact to put the number in perspective.
+            Whether you&rsquo;re a student trying to understand unit conversions, a teacher looking for a quick classroom tool, or just a curious person who loves numbers, HowMany gives you clear, accurate answers in seconds.
+          </p>
+          <p className="text-[13.5px] leading-relaxed text-cream/60 mt-3">
+            HowMany handles three kinds of questions: <strong className="text-cream/75">unit conversions</strong> (like inches to centimeters or miles to kilometers),
+            <strong className="text-cream/75"> research questions</strong> that involve real-world quantities (like the weight of an elephant or the distance to the moon),
+            and <strong className="text-cream/75">comparison questions</strong> that put big numbers into everyday context.
+            The app works in both English and Spanish — tap the flag in the top corner to switch languages at any time.
+          </p>
+          <p className="text-[13.5px] leading-relaxed text-cream/60 mt-3">
+            Not sure what to ask? Tap any of the example questions below the input box to see HowMany in action.
+            Every answer is generated fresh by AI, so you can ask virtually anything involving numbers, quantities, sizes, distances, weights, volumes, or time.
+            There are no accounts, no sign-ups, and no paywalls — HowMany is completely free to use.
+          </p>
+        </div>
+
         <QuestionInput
           ref={inputRef}
           value={inputValue}
