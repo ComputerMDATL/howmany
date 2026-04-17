@@ -98,7 +98,7 @@ function HomeInner() {
       <main className="relative z-10 max-w-[680px] mx-auto px-4 pb-16 pt-5">
         <Header onReset={handleReset} />
 
-        <div className="w-full mb-5 mt-2 text-[14px] leading-loose">
+        <div className="w-full mb-5 mt-2 text-[14px] leading-snug">
           <p className="text-cream/70">
             Have you ever asked a question like{' '}
             <span className="text-gold font-semibold text-[28px]">&ldquo;How many pizzas could fill a swimming pool?&rdquo;</span>{' '}
@@ -109,7 +109,7 @@ function HomeInner() {
             <span className="text-coral font-semibold text-[28px]">AI brain</span> figures it out instantly, for free!
           </p>
 
-          <p className="text-cream/70 mt-3">
+          <p className="text-cream/70 mt-2">
             You don&rsquo;t just get a number — you get the{' '}
             <span className="text-teal font-semibold text-[21px]">full math breakdown</span>, shown step by step so you can actually see how it works.
             Plus a{' '}
@@ -119,7 +119,7 @@ function HomeInner() {
             It&rsquo;s like having a super-smart calculator that also tells stories.
           </p>
 
-          <p className="text-cream/70 mt-3">
+          <p className="text-cream/70 mt-2">
             You can ask about{' '}
             <span className="text-gold font-semibold text-[21px]">unit conversions</span>{' '}
             (miles to kilometers, pounds to kilograms — easy!),{' '}
@@ -131,7 +131,7 @@ function HomeInner() {
             Ask how many works in <span className="text-gold font-semibold text-[28px]">English</span> and <span className="text-teal font-semibold text-[25px]">Spanish</span> — just tap the flag at the top to switch!
           </p>
 
-          <p className="text-cream/70 mt-3">
+          <p className="text-cream/70 mt-2">
             Not sure where to start?{' '}
             <span className="text-coral font-semibold text-[21px]">Tap one of the example questions</span> below and see the magic happen.
             No sign-up, no accounts, <span className="text-gold font-semibold text-[28px]">totally free</span> — just big questions and even bigger answers. Let&rsquo;s go! 🚀
