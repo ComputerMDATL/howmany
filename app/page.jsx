@@ -36,7 +36,7 @@ function HomeInner() {
   const [toast,     setToast]     = useState(null)
   const inputRef = useRef(null)
 
-  const { lang } = useLang()
+  const { lang, t } = useLang()
   const isFirstLang = useRef(true)
   useEffect(() => {
     if (isFirstLang.current) { isFirstLang.current = false; return }
