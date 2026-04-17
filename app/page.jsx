@@ -98,43 +98,43 @@ function HomeInner() {
       <main className="relative z-10 max-w-[680px] mx-auto px-4 pb-16 pt-5">
         <Header onReset={handleReset} />
 
-        <div className="w-full mb-5 mt-2 text-[14px] leading-relaxed">
+        <div className="w-full mb-5 mt-2 text-[14px] leading-loose">
           <p className="text-cream/70">
             Have you ever asked a question like{' '}
-            <span className="text-gold font-semibold">&ldquo;How many pizzas could fill a swimming pool?&rdquo;</span>{' '}
+            <span className="text-gold font-semibold text-[28px]">&ldquo;How many pizzas could fill a swimming pool?&rdquo;</span>{' '}
             or{' '}
-            <span className="text-teal font-semibold">&ldquo;How many steps is it to the moon?&rdquo;</span>?
-            {' '}That&rsquo;s exactly what <span className="text-gold font-bold text-[15px]">Ask how many</span> is here for!
+            <span className="text-teal font-semibold text-[21px]">&ldquo;How many steps is it to the moon?&rdquo;</span>?
+            {' '}That&rsquo;s exactly what <span className="text-gold font-bold text-[25px]">Ask how many</span> is here for!
             Type in any question about numbers, sizes, distances, or amounts — and our{' '}
-            <span className="text-coral font-semibold">AI brain</span> figures it out instantly, for free!
+            <span className="text-coral font-semibold text-[28px]">AI brain</span> figures it out instantly, for free!
           </p>
 
           <p className="text-cream/70 mt-3">
             You don&rsquo;t just get a number — you get the{' '}
-            <span className="text-teal font-semibold">full math breakdown</span>, shown step by step so you can actually see how it works.
+            <span className="text-teal font-semibold text-[21px]">full math breakdown</span>, shown step by step so you can actually see how it works.
             Plus a{' '}
-            <span className="text-gold font-semibold">cool diagram</span> to help you picture the size,
+            <span className="text-gold font-semibold text-[25px]">cool diagram</span> to help you picture the size,
             and a{' '}
-            <span className="text-coral font-semibold">fun fact</span> that will blow your mind!
+            <span className="text-coral font-semibold text-[28px]">fun fact</span> that will blow your mind!
             It&rsquo;s like having a super-smart calculator that also tells stories.
           </p>
 
           <p className="text-cream/70 mt-3">
             You can ask about{' '}
-            <span className="text-gold font-semibold">unit conversions</span>{' '}
+            <span className="text-gold font-semibold text-[21px]">unit conversions</span>{' '}
             (miles to kilometers, pounds to kilograms — easy!),{' '}
-            <span className="text-teal font-semibold">real-world comparisons</span>{' '}
+            <span className="text-teal font-semibold text-[25px]">real-world comparisons</span>{' '}
             (how heavy is a blue whale? how tall is the Eiffel Tower in bananas?),
             or any wild{' '}
-            <span className="text-coral font-semibold">quantity question</span>{' '}
+            <span className="text-coral font-semibold text-[21px]">quantity question</span>{' '}
             your brain can dream up.
-            Ask how many works in <span className="text-gold font-semibold">English</span> and <span className="text-teal font-semibold">Spanish</span> — just tap the flag at the top to switch!
+            Ask how many works in <span className="text-gold font-semibold text-[28px]">English</span> and <span className="text-teal font-semibold text-[25px]">Spanish</span> — just tap the flag at the top to switch!
           </p>
 
           <p className="text-cream/70 mt-3">
             Not sure where to start?{' '}
-            <span className="text-coral font-semibold">Tap one of the example questions</span> below and see the magic happen.
-            No sign-up, no accounts, <span className="text-gold font-semibold">totally free</span> — just big questions and even bigger answers. Let&rsquo;s go! 🚀
+            <span className="text-coral font-semibold text-[21px]">Tap one of the example questions</span> below and see the magic happen.
+            No sign-up, no accounts, <span className="text-gold font-semibold text-[28px]">totally free</span> — just big questions and even bigger answers. Let&rsquo;s go! 🚀
           </p>
         </div>
 
