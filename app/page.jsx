@@ -98,26 +98,43 @@ function HomeInner() {
       <main className="relative z-10 max-w-[680px] mx-auto px-4 pb-16 pt-5">
         <Header onReset={handleReset} />
 
-        <div className="w-full mb-5 mt-2">
-          <p className="text-[13.5px] leading-relaxed text-cream/60">
-            <strong className="text-cream/80">HowMany</strong> is a free, instant answer engine for quantity and measurement questions — powered by AI.
-            Ever wondered how many gallons of water are in the ocean, how many steps it takes to walk a mile, or how many times your heart beats in a year?
-            Just type your question and HowMany breaks it down step by step, showing you the real math behind the answer so you actually understand where the number comes from.
+        <div className="w-full mb-5 mt-2 text-[14px] leading-relaxed">
+          <p className="text-cream/70">
+            Have you ever asked a question like{' '}
+            <span className="text-gold font-semibold">&ldquo;How many pizzas could fill a swimming pool?&rdquo;</span>{' '}
+            or{' '}
+            <span className="text-teal font-semibold">&ldquo;How many steps is it to the moon?&rdquo;</span>?
+            {' '}That&rsquo;s exactly what <span className="text-gold font-bold text-[15px]">HowMany</span> is here for!
+            Type in any question about numbers, sizes, distances, or amounts — and our{' '}
+            <span className="text-coral font-semibold">AI brain</span> figures it out instantly, for free!
           </p>
-          <p className="text-[13.5px] leading-relaxed text-cream/60 mt-3">
-            Each answer includes a full mathematical breakdown, a visual diagram to make the scale easy to grasp, and a fun fact to put the number in perspective.
-            Whether you&rsquo;re a student trying to understand unit conversions, a teacher looking for a quick classroom tool, or just a curious person who loves numbers, HowMany gives you clear, accurate answers in seconds.
+
+          <p className="text-cream/70 mt-3">
+            You don&rsquo;t just get a number — you get the{' '}
+            <span className="text-teal font-semibold">full math breakdown</span>, shown step by step so you can actually see how it works.
+            Plus a{' '}
+            <span className="text-gold font-semibold">cool diagram</span> to help you picture the size,
+            and a{' '}
+            <span className="text-coral font-semibold">fun fact</span> that will blow your mind!
+            It&rsquo;s like having a super-smart calculator that also tells stories.
           </p>
-          <p className="text-[13.5px] leading-relaxed text-cream/60 mt-3">
-            HowMany handles three kinds of questions: <strong className="text-cream/75">unit conversions</strong> (like inches to centimeters or miles to kilometers),
-            <strong className="text-cream/75"> research questions</strong> that involve real-world quantities (like the weight of an elephant or the distance to the moon),
-            and <strong className="text-cream/75">comparison questions</strong> that put big numbers into everyday context.
-            The app works in both English and Spanish — tap the flag in the top corner to switch languages at any time.
+
+          <p className="text-cream/70 mt-3">
+            You can ask about{' '}
+            <span className="text-gold font-semibold">unit conversions</span>{' '}
+            (miles to kilometers, pounds to kilograms — easy!),{' '}
+            <span className="text-teal font-semibold">real-world comparisons</span>{' '}
+            (how heavy is a blue whale? how tall is the Eiffel Tower in bananas?),
+            or any wild{' '}
+            <span className="text-coral font-semibold">quantity question</span>{' '}
+            your brain can dream up.
+            HowMany works in <span className="text-gold font-semibold">English</span> and <span className="text-teal font-semibold">Spanish</span> — just tap the flag at the top to switch!
           </p>
-          <p className="text-[13.5px] leading-relaxed text-cream/60 mt-3">
-            Not sure what to ask? Tap any of the example questions below the input box to see HowMany in action.
-            Every answer is generated fresh by AI, so you can ask virtually anything involving numbers, quantities, sizes, distances, weights, volumes, or time.
-            There are no accounts, no sign-ups, and no paywalls — HowMany is completely free to use.
+
+          <p className="text-cream/70 mt-3">
+            Not sure where to start?{' '}
+            <span className="text-coral font-semibold">Tap one of the example questions</span> below and see the magic happen.
+            No sign-up, no accounts, <span className="text-gold font-semibold">totally free</span> — just big questions and even bigger answers. Let&rsquo;s go! 🚀
           </p>
         </div>
 
