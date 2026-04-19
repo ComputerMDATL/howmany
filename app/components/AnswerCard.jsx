@@ -3,6 +3,24 @@ import { useState, useRef, useEffect } from 'react'
 import { drawVisualizer } from '../lib/visualizer'
 import { useLang } from '../context/LanguageContext'
 
+function TabAd({ slotId }) {
+  useEffect(() => {
+    try { ;(window.adsbygoogle = window.adsbygoogle || []).push({}) } catch {}
+  }, [])
+  return (
+    <div className="mt-3">
+      <ins
+        className="adsbygoogle"
+        style={{ display: 'block', minHeight: 100 }}
+        data-ad-client="ca-pub-6335883588140435"
+        data-ad-slot={slotId}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
+    </div>
+  )
+}
+
 function safeHtml(s) {
   const d = document.createElement('div')
   d.textContent = String(s ?? '')
@@ -94,6 +112,7 @@ export default function AnswerCard({ question, answer, onReset, onShare }) {
                 />
               </div>
             ))}
+            <TabAd key="steps" slotId="9232067343" />
           </div>
         )}
 
@@ -108,6 +127,7 @@ export default function AnswerCard({ question, answer, onReset, onShare }) {
             {caption && (
               <p className="text-[11px] text-muted mt-2.5 leading-relaxed">{caption}</p>
             )}
+            <TabAd key="visual" slotId="5188867248" />
           </div>
         )}
 
@@ -135,28 +155,7 @@ export default function AnswerCard({ question, answer, onReset, onShare }) {
               </div>
             )}
 
-            {/* AD SLOT 3 — Native ad in Fun Fact tab */}
-            <div className="mt-3.5 bg-gold/[0.04] border border-gold/[0.12] rounded-xl px-4 py-3.5 flex gap-3">
-              <span className="text-[9px] text-muted font-semibold tracking-widest uppercase bg-white/[0.06] px-1.5 py-0.5 rounded self-start flex-shrink-0">
-                Ad
-              </span>
-              <div>
-                <p className="text-[13px] font-semibold text-cream mb-0.5">
-                  🌍 National Geographic Kids
-                </p>
-                <p className="text-[11px] text-muted leading-relaxed">
-                  Dive deeper into the science behind your question. Wild facts, videos & experiments.
-                </p>
-                <a
-                  href="https://kids.nationalgeographic.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[11px] text-gold mt-1.5 block hover:underline"
-                >
-                  Explore natgeokids.com →
-                </a>
-              </div>
-            </div>
+            <TabAd key="fact" slotId="7481048157" />
           </div>
         )}
       </div>
