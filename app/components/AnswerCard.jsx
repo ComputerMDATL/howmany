@@ -11,7 +11,7 @@ function safeHtml(s) {
     .replace(/&lt;em&gt;/g, '<em>').replace(/&lt;\/em&gt;/g, '</em>')
 }
 
-export default function AnswerCard({ question, answer, onReset, onShare, interstitial }) {
+export default function AnswerCard({ question, answer, onReset, onShare }) {
   const { t } = useLang()
   const [activeTab, setActiveTab] = useState('steps')
   const canvasRef  = useRef(null)
@@ -174,11 +174,6 @@ export default function AnswerCard({ question, answer, onReset, onShare, interst
           className="bg-transparent border border-white/[0.13] text-muted rounded-full py-2.5 px-4 font-body text-xs cursor-pointer whitespace-nowrap hover:border-cream hover:text-cream transition-all"
         >
           {t('ask_another')}
-          {interstitial.showingCounter && (
-            <span className="text-[10px] opacity-50 ml-1">
-              · {t('ad_in')} {interstitial.untilNext}
-            </span>
-          )}
         </button>
       </div>
     </div>

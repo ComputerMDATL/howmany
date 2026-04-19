@@ -3,7 +3,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { LanguageProvider, useLang } from './context/LanguageContext'
 import { useAsk }          from './hooks/useAsk'
-import { useInterstitial } from './hooks/useInterstitial'
 import Stars          from './components/Stars'
 import Header         from './components/Header'
 import QuestionInput  from './components/QuestionInput'
@@ -12,7 +11,6 @@ import LoadingState   from './components/LoadingState'
 import FallbackCard   from './components/FallbackCard'
 import AnswerCard     from './components/AnswerCard'
 import AdBanner       from './components/AdBanner'
-import Interstitial   from './components/Interstitial'
 import SharePanel     from './components/SharePanel'
 import Toast          from './components/Toast'
 
@@ -29,7 +27,6 @@ export default function Home() {
 
 function HomeInner() {
   const { status, answer, fallback, thought, isRetry, ask, reset, patchAnswer } = useAsk()
-  const interstitial = useInterstitial()
   const [currentQ,   setCurrentQ]  = useState('')
   const [inputValue, setInputValue] = useState('')
   const [shareOpen,  setShareOpen] = useState(false)
@@ -80,20 +77,17 @@ function HomeInner() {
   }, [reset])
 
   const handleReset = useCallback(() => {
-    interstitial.maybeShow(() => {
-      reset()
-      setShareOpen(false)
-      setCurrentQ('')
-      setInputValue('')
-      setTimeout(() => inputRef.current?.focus(), 100)
-    })
-  }, [interstitial, reset])
+    reset()
+    setShareOpen(false)
+    setCurrentQ('')
+    setInputValue('')
+    setTimeout(() => inputRef.current?.focus(), 100)
+  }, [reset])
 
   return (
     <>
       <Stars />
       <Toast message={toast} />
-      <Interstitial {...interstitial} />
 
       <main className="relative z-10 max-w-[680px] mx-auto px-4 pb-16 pt-5">
         <Header onReset={handleReset} />
@@ -157,7 +151,6 @@ function HomeInner() {
               answer={answer}
               onReset={handleReset}
               onShare={() => setShareOpen(o => !o)}
-              interstitial={interstitial}
             />
             <AdBanner />
             {shareOpen && (
